@@ -12,7 +12,7 @@ export default async function NewOrderPage() {
   const products = await prisma.gasProduct.findMany({ where: { active: true }, orderBy: { sizeKg: "asc" } });
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/dashboard/orders" className="rounded-full p-2 hover:bg-gray-100 transition-colors">
           <ArrowLeft className="h-5 w-5 text-gray-700" />

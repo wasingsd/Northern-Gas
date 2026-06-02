@@ -66,7 +66,11 @@ export default async function OrdersPage() {
               ) : (
                 orders.map((o) => (
                   <tr key={o.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-primary">{o.orderNo}</td>
+                    <td className="px-6 py-4 font-medium">
+                      <Link href={`/dashboard/orders/${o.id}`} className="text-primary hover:underline hover:text-primary-hover transition-colors">
+                        {o.orderNo}
+                      </Link>
+                    </td>
                     <td className="px-6 py-4">
                       <div className="font-medium text-foreground">{o.customer.name}</div>
                       <div className="text-xs text-gray-500 line-clamp-1">{o.customer.address || "-"}</div>

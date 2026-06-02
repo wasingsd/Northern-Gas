@@ -114,3 +114,98 @@ export async function createOrderAction(formData: FormData) {
   revalidatePath("/dashboard/dispatch");
   redirect("/dashboard/orders");
 }
+
+export async function updateOrderAction(orderId: string, formData: FormData) {
+  const customerName = formData.get("customerName") as string;
+  const customerTaxType = formData.get("customerTaxType") as string;
+  const customerTaxId = formData.get("customerTaxId") as string;
+  const customerBranchName = formData.get("customerBranchName") as string;
+  const customerBranchNo = formData.get("customerBranchNo") as string;
+  const customerCode = formData.get("customerCode") as string;
+  const customerPhone = formData.get("customerPhone") as string;
+  const customerEmail = formData.get("customerEmail") as string;
+  const customerAddress = formData.get("customerAddress") as string;
+  
+  const productIdsJson = formData.get("productIds") as string;
+  let productIds: string[] = [];
+  try {
+    productIds = JSON.parse(productIdsJson);
+  } catch (e) {
+    throw new Error("Invalid product data");
+  }
+  
+  if (!customerName || productIds.length === 0) {
+    throw new Error("Missing required fields");
+  }
+
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { customer: true }
+  });
+
+  if (!order) throw new Error("Order not found");
+
+  const customerDataToUpdate = {
+    name: customerName,
+    ...(customerTaxType ? { taxType: customerTaxType } : {}),
+    ...(customerTaxId ? { taxId: customerTaxId } : {}),
+    ...(customerBranchName ? { branchName: customerBranchName } : {}),
+    ...(customerBranchNo ? { branchNo: customerBranchNo } : {}),
+    ...(customerCode ? { customerCode: customerCode } : {}),
+    ...(customerPhone ? { phone: customerPhone } : {}),
+    ...(customerEmail ? { email: customerEmail } : {}),
+    ...(customerAddress ? { address: customerAddress } : {})
+  };
+
+  await prisma.customer.update({
+    where: { id: order.customerId },
+    data: customerDataToUpdate
+  });
+
+  // Calculate order items and total amount
+  let totalPrice = 0;
+  const orderItemsMap = new Map<string, { productId: string, quantity: number, unitPrice: number, totalPrice: number }>();
+  
+  for (const pId of productIds) {
+     const product = await prisma.gasProduct.findUnique({ where: { id: pId } });
+     if (product) {
+        totalPrice += product.salePrice + product.deliveryFee;
+        
+        const existing = orderItemsMap.get(pId);
+        if (existing) {
+           existing.quantity += 1;
+           existing.totalPrice += product.salePrice;
+        } else {
+           orderItemsMap.set(pId, {
+             productId: pId,
+             quantity: 1,
+             unitPrice: product.salePrice,
+             totalPrice: product.salePrice
+           });
+        }
+     }
+  }
+
+  const orderItemsData = Array.from(orderItemsMap.values());
+  if (orderItemsData.length === 0) throw new Error("No valid products found");
+
+  // Delete existing items
+  await prisma.orderItem.deleteMany({
+    where: { orderId: order.id }
+  });
+
+  // Create new items and update total
+  await prisma.order.update({
+    where: { id: order.id },
+    data: {
+      totalAmount: totalPrice,
+      items: {
+        create: orderItemsData
+      }
+    }
+  });
+
+  revalidatePath("/dashboard/orders");
+  revalidatePath(`/dashboard/orders/${order.id}`);
+  redirect(`/dashboard/orders/${order.id}`);
+}

@@ -15,18 +15,18 @@ type Customer = {
   address: string | null;
 };
 
-export default function CustomerSection({ customers }: { customers: Customer[] }) {
-  const [query, setQuery] = useState("");
+export default function CustomerSection({ customers, initialData }: { customers: Customer[], initialData?: Customer }) {
+  const [query, setQuery] = useState(initialData?.name || "");
   const [showDropdown, setShowDropdown] = useState(false);
   
-  const [taxType, setTaxType] = useState("UNSPECIFIED");
-  const [taxId, setTaxId] = useState("");
-  const [branchName, setBranchName] = useState("");
-  const [branchNo, setBranchNo] = useState("");
-  const [customerCode, setCustomerCode] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
+  const [taxType, setTaxType] = useState(initialData?.taxType || "UNSPECIFIED");
+  const [taxId, setTaxId] = useState(initialData?.taxId || "");
+  const [branchName, setBranchName] = useState(initialData?.branchName || "");
+  const [branchNo, setBranchNo] = useState(initialData?.branchNo || "");
+  const [customerCode, setCustomerCode] = useState(initialData?.customerCode || "");
+  const [phone, setPhone] = useState(initialData?.phone || "");
+  const [email, setEmail] = useState(initialData?.email || "");
+  const [address, setAddress] = useState(initialData?.address || "");
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
