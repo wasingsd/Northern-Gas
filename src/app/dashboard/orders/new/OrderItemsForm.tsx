@@ -135,14 +135,13 @@ export default function OrderItemsForm({ products, cylinders, initialItems }: { 
                 <th className="px-4 py-3 w-16 text-center">ลำดับ</th>
                 <th className="px-4 py-3">รหัสถัง (Asset / QR)</th>
                 <th className="px-4 py-3">ประเภทสินค้า</th>
-                <th className="px-4 py-3 text-right">ราคา</th>
                 <th className="px-4 py-3 w-12"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {scannedCylinders.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
                     ยังไม่มีสินค้าในรายการ กรุณาสแกนบาร์โค้ด
                   </td>
                 </tr>
@@ -156,9 +155,6 @@ export default function OrderItemsForm({ products, cylinders, initialItems }: { 
                     </td>
                     <td className="px-4 py-3">
                       {cyl.product ? `${cyl.product.name} (${cyl.product.sizeKg} กก.)` : 'ไม่ระบุ'}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {cyl.product ? `${cyl.product.salePrice.toLocaleString()} ฿` : '-'}
                     </td>
                     <td className="px-4 py-3 text-center">
                       <button
@@ -193,7 +189,6 @@ export default function OrderItemsForm({ products, cylinders, initialItems }: { 
                 </div>
                 <div className="text-right">
                   <span className="text-sm font-bold text-gray-900">x {item.count}</span>
-                  <p className="text-xs text-primary font-medium">{(item.product.salePrice * item.count).toLocaleString()} ฿</p>
                 </div>
               </div>
             ))}
@@ -202,12 +197,11 @@ export default function OrderItemsForm({ products, cylinders, initialItems }: { 
         
         <div className="border-t border-border pt-4">
           <div className="flex justify-between items-center">
-            <span className="text-gray-600 font-medium">ยอดรวมทั้งหมด</span>
+            <span className="text-gray-600 font-medium">จำนวนถังทั้งหมด</span>
             <span className="text-xl font-bold text-primary">
-              {scannedCylinders.reduce((sum, cyl) => sum + (cyl.product?.salePrice || 0), 0).toLocaleString()} ฿
+              {scannedCylinders.length} ใบ
             </span>
           </div>
-          <p className="text-xs text-gray-500 text-right mt-1">* ราคานี้ยังไม่รวมค่าจัดส่ง</p>
         </div>
       </div>
     </div>

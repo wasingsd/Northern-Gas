@@ -51,7 +51,6 @@ export default async function OrdersPage() {
                 <th className="px-6 py-4 font-medium">เลขที่ออเดอร์</th>
                 <th className="px-6 py-4 font-medium">ลูกค้า</th>
                 <th className="px-6 py-4 font-medium">สินค้า</th>
-                <th className="px-6 py-4 font-medium text-right">ยอดรวม (บาท)</th>
                 <th className="px-6 py-4 font-medium text-center">สถานะออเดอร์</th>
                 <th className="px-6 py-4 font-medium text-center">งานจัดส่ง</th>
               </tr>
@@ -59,7 +58,7 @@ export default async function OrdersPage() {
             <tbody className="divide-y divide-border">
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                     ยังไม่มีรายการคำสั่งซื้อ
                   </td>
                 </tr>
@@ -82,9 +81,7 @@ export default async function OrdersPage() {
                         </div>
                       ))}
                     </td>
-                    <td className="px-6 py-4 text-right text-foreground font-bold">
-                      {o.totalAmount.toLocaleString()}
-                    </td>
+
                     <td className="px-6 py-4 text-center">
                       <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium bg-yellow-50 text-yellow-700">
                         <Clock className="h-3 w-3" />

@@ -36,9 +36,6 @@ export default function DispatchBoardClient({ initialJobs }: { initialJobs: any[
                 <div key={job.id} className="bg-white p-4 rounded-lg shadow-sm border border-border relative">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-bold text-primary">{job.jobNo}</span>
-                    <span className="text-xs text-gray-500">
-                      ยอดเก็บ: ฿{job.order.totalAmount}
-                    </span>
                   </div>
                   
                   <div className="font-medium text-sm text-foreground mb-1">

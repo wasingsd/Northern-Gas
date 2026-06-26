@@ -162,7 +162,6 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
               <th className="px-6 py-3 font-medium">รหัสสินค้า</th>
               <th className="px-6 py-3 font-medium">ชื่อสินค้า</th>
               <th className="px-6 py-3 font-medium text-center">จำนวน</th>
-              <th className="px-6 py-3 font-medium text-right">ราคารวม</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -171,7 +170,6 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
                 <td className="px-6 py-4 text-gray-500">{item.product.id.slice(-6).toUpperCase()}</td>
                 <td className="px-6 py-4 font-medium">{item.product.name} ({item.product.sizeKg} กก.)</td>
                 <td className="px-6 py-4 text-center">{item.quantity} ถัง</td>
-                <td className="px-6 py-4 text-right">฿{item.totalPrice.toLocaleString()}</td>
               </tr>
             ))}
           </tbody>
@@ -180,13 +178,9 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
         {/* Summary Footer */}
         <div className="bg-gray-50 p-6 border-t border-border flex justify-end">
           <div className="w-64 space-y-3">
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>รวมจำนวนสินค้า:</span>
-              <span className="font-medium">{order.items.reduce((sum, item) => sum + item.quantity, 0)} ถัง</span>
-            </div>
-            <div className="flex justify-between text-lg font-bold text-foreground pt-3 border-t border-gray-200">
-              <span className="flex items-center gap-2"><Receipt className="h-5 w-5" /> ยอดสุทธิ:</span>
-              <span className="text-primary">฿{order.totalAmount.toLocaleString()}</span>
+            <div className="flex justify-between text-lg font-bold text-foreground pt-3">
+              <span className="flex items-center gap-2"><Package className="h-5 w-5" /> รวมจำนวนสินค้า:</span>
+              <span className="text-primary">{order.items.reduce((sum, item) => sum + item.quantity, 0)} ถัง</span>
             </div>
           </div>
         </div>

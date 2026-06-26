@@ -85,17 +85,12 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
               {job.order.items.map((item: any) => (
                 <div key={item.id} className="flex justify-between items-center p-4 bg-gray-900/50 rounded-2xl border border-gray-700/30">
                   <span className="text-gray-200 font-medium">{item.product.name} <span className="text-gray-500 ml-1">x{item.quantity}</span></span>
-                  <span className="font-bold text-white">฿{item.totalPrice.toLocaleString()}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Total */}
-          <div className="border-t border-gray-700/50 pt-6 flex justify-between items-end">
-            <span className="font-bold text-gray-400">ยอดเก็บเงินรวม</span>
-            <span className="text-3xl font-bold text-white tracking-tight">฿{job.order.totalAmount.toLocaleString()}</span>
-          </div>
+
         </div>
       </div>
 
