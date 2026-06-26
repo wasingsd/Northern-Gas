@@ -101,7 +101,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
 
       <div className="space-y-3 pt-2">
         <a 
-          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.address)}`}
+          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.address || '')}`}
           target="_blank"
           rel="noreferrer"
           className="w-full flex items-center justify-center gap-2 py-4 bg-gray-800/80 hover:bg-gray-700 text-blue-400 rounded-2xl font-bold transition-colors border border-gray-700/50 shadow-lg"

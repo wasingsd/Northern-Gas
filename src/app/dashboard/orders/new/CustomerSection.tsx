@@ -106,78 +106,14 @@ export default function CustomerSection({ customers, initialData }: { customers:
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
-        <div className="w-48 text-gray-700 font-medium">ประเภทผู้เสียภาษี</div>
-        <div className="flex items-center gap-6">
-          <input type="hidden" name="customerTaxType" value={taxType} />
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="radio" 
-              checked={taxType === "UNSPECIFIED"} 
-              onChange={() => setTaxType("UNSPECIFIED")}
-              className="text-primary focus:ring-primary"
-            />
-            <span className="text-gray-700">ไม่ระบุ</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="radio" 
-              checked={taxType === "INDIVIDUAL"} 
-              onChange={() => setTaxType("INDIVIDUAL")}
-              className="text-primary focus:ring-primary"
-            />
-            <span className="text-gray-700">บุคคลธรรมดา</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="radio" 
-              checked={taxType === "CORPORATE"} 
-              onChange={() => setTaxType("CORPORATE")}
-              className="text-primary focus:ring-primary"
-            />
-            <span className="text-gray-700">นิติบุคคล</span>
-          </label>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-6">
-        <div className="w-48 text-gray-700 font-medium">เลขประจำตัวผู้เสียภาษี</div>
-        <div className="flex-1">
-          <input 
-            type="text" 
-            name="customerTaxId" 
-            value={taxId}
-            onChange={e => setTaxId(e.target.value)}
-            className="w-full rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-6">
-        <div className="w-48 text-gray-700 font-medium">ชื่อสาขา</div>
-        <div className="flex-1">
-          <input 
-            type="text" 
-            name="customerBranchName" 
-            value={branchName}
-            onChange={e => setBranchName(e.target.value)}
-            className="w-full rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-6">
-        <div className="w-48 text-gray-700 font-medium">เลขที่สาขา</div>
-        <div className="flex-1">
-          <input 
-            type="text" 
-            name="customerBranchNo" 
-            value={branchNo}
-            onChange={e => setBranchNo(e.target.value)}
-            className="w-full rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-        </div>
-      </div>
+      {/* Hidden Fields to retain data when a customer is selected */}
+      <input type="hidden" name="customerTaxType" value={taxType} />
+      <input type="hidden" name="customerTaxId" value={taxId} />
+      <input type="hidden" name="customerBranchName" value={branchName} />
+      <input type="hidden" name="customerBranchNo" value={branchNo} />
+      <input type="hidden" name="customerPhone" value={phone} />
+      <input type="hidden" name="customerEmail" value={email} />
+      <input type="hidden" name="customerAddress" value={address} />
 
       <div className="flex items-center gap-6">
         <div className="w-48 text-gray-700 font-medium">รหัสลูกค้า</div>
@@ -188,45 +124,6 @@ export default function CustomerSection({ customers, initialData }: { customers:
             value={customerCode}
             onChange={e => setCustomerCode(e.target.value)}
             className="w-full rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-6">
-        <div className="w-48 text-gray-700 font-medium">เบอร์โทรศัพท์ลูกค้า</div>
-        <div className="flex-1">
-          <input 
-            type="text" 
-            name="customerPhone" 
-            value={phone}
-            onChange={e => setPhone(e.target.value)}
-            className="w-full rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-6">
-        <div className="w-48 text-gray-700 font-medium">อีเมลลูกค้า</div>
-        <div className="flex-1">
-          <input 
-            type="email" 
-            name="customerEmail" 
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-        </div>
-      </div>
-
-      <div className="flex items-start gap-6">
-        <div className="w-48 text-gray-700 font-medium pt-2">ที่อยู่ลูกค้า (จัดส่ง)</div>
-        <div className="flex-1">
-          <textarea 
-            name="customerAddress" 
-            value={address}
-            onChange={e => setAddress(e.target.value)}
-            rows={3}
-            className="w-full rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"
           />
         </div>
       </div>

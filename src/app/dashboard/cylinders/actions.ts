@@ -9,13 +9,15 @@ const prisma = new PrismaClient();
 export async function createCylinderAction(formData: FormData) {
   const assetCode = formData.get("assetCode") as string;
   const qrCode = formData.get("qrCode") as string;
+  const productId = formData.get("productId") as string;
   
-  if (!assetCode || !qrCode) throw new Error("Missing required fields");
+  if (!assetCode || !qrCode || !productId) throw new Error("Missing required fields");
 
   const cylinder = await prisma.cylinder.create({
     data: {
       assetCode,
       qrCode,
+      productId,
       status: "READY_TO_DISPATCH", // default status
     }
   });
@@ -35,14 +37,16 @@ export async function createCylinderAction(formData: FormData) {
 export async function updateCylinderAction(id: string, formData: FormData) {
   const assetCode = formData.get("assetCode") as string;
   const qrCode = formData.get("qrCode") as string;
+  const productId = formData.get("productId") as string;
   
-  if (!assetCode || !qrCode) throw new Error("Missing required fields");
+  if (!assetCode || !qrCode || !productId) throw new Error("Missing required fields");
 
   await prisma.cylinder.update({
     where: { id },
     data: {
       assetCode,
       qrCode,
+      productId,
     }
   });
 

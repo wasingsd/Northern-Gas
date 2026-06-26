@@ -17,6 +17,8 @@ export default async function EditCylinderPage({ params }: { params: Promise<{ i
     }
   });
 
+  const products = await prisma.gasProduct.findMany({ where: { active: true } });
+
   if (!cylinder) return notFound();
 
   // We need to pass the ID to the server action
@@ -63,6 +65,26 @@ export default async function EditCylinderPage({ params }: { params: Promise<{ i
                 className="w-full rounded-lg border border-border px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors bg-white text-foreground"
                 placeholder="คลิกที่นี่แล้วใช้ปืนยิงสแกนบาร์โค้ด"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="productId" className="text-sm font-medium text-foreground">
+                ประเภทสินค้า (ขนาดถัง) <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="productId"
+                name="productId"
+                defaultValue={cylinder.productId || ""}
+                required
+                className="w-full rounded-lg border border-border px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors bg-white text-foreground"
+              >
+                <option value="">-- เลือกขนาดถัง --</option>
+                {products.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({p.sizeKg} กก.)
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           

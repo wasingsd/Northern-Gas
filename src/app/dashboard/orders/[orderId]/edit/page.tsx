@@ -36,12 +36,15 @@ export default async function EditOrderPage({ params }: { params: Promise<{ orde
 
   const customers = await prisma.customer.findMany({ orderBy: { name: "asc" } });
   const products = await prisma.gasProduct.findMany({ where: { active: true }, orderBy: { sizeKg: "asc" } });
+  
+  // We need to fetch all cylinders to allow scanning new ones
+  const allCylinders = await prisma.cylinder.findMany({ include: { product: true } });
 
-  const initialItems = order.items.map((item, index) => ({
-    id: Date.now() + index, // unique id for client state
-    productId: item.productId,
-    quantity: item.quantity
-  }));
+  // Get cylinders that are currently associated with this order
+  const orderCylinders = await prisma.cylinder.findMany({
+    where: { orderId: order.id },
+    include: { product: true }
+  });
 
   const updateActionWithId = updateOrderAction.bind(null, order.id);
 
@@ -61,7 +64,7 @@ export default async function EditOrderPage({ params }: { params: Promise<{ orde
         <form action={updateActionWithId} className="p-6 space-y-6">
           <CustomerSection customers={customers} initialData={order.customer} />
           
-          <OrderItemsForm products={products} initialItems={initialItems} />
+          <OrderItemsForm products={products} cylinders={allCylinders} initialItems={orderCylinders} />
 
           <div className="pt-4 flex items-center justify-end gap-3 border-t border-border">
             <Link

@@ -52,17 +52,26 @@ model GasProduct {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   orderItems   OrderItem[]
+  cylinders    Cylinder[]
 }
 
 model Cylinder {
-  id                String   @id @default(cuid())
-  assetCode         String   @unique
-  qrCode            String   @unique
-  status            String   // READY_TO_DISPATCH, WITH_CUSTOMER, etc.
+  id                String       @id @default(cuid())
+  assetCode         String       @unique
+  qrCode            String       @unique
+  status            String       // READY_TO_DISPATCH, WITH_CUSTOMER, etc.
+  
+  productId         String?
+  product           GasProduct?  @relation(fields: [productId], references: [id])
+  
   currentCustomerId String?
-  currentCustomer   Customer? @relation(fields: [currentCustomerId], references: [id])
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  currentCustomer   Customer?    @relation(fields: [currentCustomerId], references: [id])
+  
+  orderId           String?
+  order             Order?       @relation(fields: [orderId], references: [id])
+  
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
   logs              CylinderLog[]
   refillBatchId     String?
   refillBatch       RefillBatch? @relation(fields: [refillBatchId], references: [id])
@@ -98,6 +107,7 @@ model Order {
   totalAmount   Float
   paymentStatus String   @default("UNPAID") // UNPAID, PAID
   items         OrderItem[]
+  cylinders     Cylinder[]
   deliveryJob   DeliveryJob?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

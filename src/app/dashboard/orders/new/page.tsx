@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 export default async function NewOrderPage() {
   const customers = await prisma.customer.findMany({ orderBy: { name: "asc" } });
   const products = await prisma.gasProduct.findMany({ where: { active: true }, orderBy: { sizeKg: "asc" } });
+  const cylinders = await prisma.cylinder.findMany({ include: { product: true } });
 
   return (
     <div className="space-y-6">
@@ -27,7 +28,7 @@ export default async function NewOrderPage() {
         <form action={createOrderAction} className="p-6 space-y-6">
           <CustomerSection customers={customers} />
           
-          <OrderItemsForm products={products} />
+          <OrderItemsForm products={products} cylinders={cylinders} />
 
           <div className="pt-4 flex items-center justify-end gap-3 border-t border-border">
             <Link
