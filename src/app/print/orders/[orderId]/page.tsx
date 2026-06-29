@@ -2,9 +2,12 @@ import prisma from "@/lib/prisma";
 import PrintTrigger from "./PrintTrigger";
 import { notFound } from "next/navigation";
 
-export default async function PrintOrderPage({ params }: { params: { orderId: string } }) {
+export default async function PrintOrderPage(props: { params: Promise<{ orderId: string }> }) {
+  const params = await props.params;
+  const orderId = params.orderId;
+
   const order = await prisma.order.findUnique({
-    where: { id: params.orderId },
+    where: { id: orderId },
     include: {
       customer: true,
       cylinders: true,
