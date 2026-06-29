@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { ScanLine, Trash2, Package } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { ScanLine, Trash2, Package, Camera } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const CameraScanner = dynamic(() => import("../../../dashboard/scanner/CameraScanner"), { ssr: false });
 
 type Cylinder = {
   id: string;
@@ -14,12 +17,31 @@ export default function OrderItemsForm({ cylinders, initialItems }: { cylinders:
   const [scannedCylinders, setScannedCylinders] = useState<Cylinder[]>(initialItems || []);
   const [inputValue, setInputValue] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus input automatically
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  const handleCameraScan = useCallback((code: string) => {
+    // Process code just like Enter key
+    const foundCylinder = cylinders.find(c => c.qrCode === code || c.cylinderNo === code);
+
+    if (!foundCylinder) {
+      setErrorMsg(`ไม่พบถังแก๊สที่มีรหัส: ${code}`);
+      return;
+    }
+
+    if (scannedCylinders.some(c => c.id === foundCylinder.id)) {
+      setErrorMsg(`ถังแก๊สรหัส ${code} ถูกเพิ่มในรายการแล้ว`);
+      return;
+    }
+
+    setScannedCylinders(prev => [...prev, foundCylinder]);
+    setErrorMsg("");
+  }, [cylinders, scannedCylinders]);
 
   const handleScan = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -61,9 +83,18 @@ export default function OrderItemsForm({ cylinders, initialItems }: { cylinders:
       
       {/* Left Side: Scanner & Table */}
       <div className="flex-1 space-y-4">
-        <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-          <Package className="h-5 w-5" />
-          2. สแกนสินค้าท่อแก๊ส
+        <h3 className="text-lg font-bold text-foreground flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            2. สแกนสินค้าท่อแก๊ส
+          </div>
+          <button 
+            type="button" 
+            onClick={() => setIsCameraOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-bold hover:bg-blue-100 transition-colors"
+          >
+            <Camera className="h-4 w-4" /> เปิดกล้อง
+          </button>
         </h3>
 
         <div className="bg-gray-50 border border-border rounded-xl p-6 mb-4">
@@ -81,6 +112,7 @@ export default function OrderItemsForm({ cylinders, initialItems }: { cylinders:
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleScan}
+                inputMode="none" /* Hide virtual keyboard */
                 placeholder="สแกน หรือ พิมพ์รหัสแล้วกด Enter"
                 className="pl-10 w-full rounded-lg border border-border px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-lg"
               />
@@ -152,6 +184,13 @@ export default function OrderItemsForm({ cylinders, initialItems }: { cylinders:
           </div>
         </div>
       </div>
+
+      {isCameraOpen && (
+        <CameraScanner 
+          onScanSuccess={handleCameraScan} 
+          onClose={() => setIsCameraOpen(false)} 
+        />
+      )}
     </div>
   );
 }
