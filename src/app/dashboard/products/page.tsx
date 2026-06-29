@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 
 export default async function ProductsPage() {
   const cylinders = await prisma.cylinder.findMany({
-    include: { currentCustomer: true },
+    include: { currentCustomer: true, product: true },
     orderBy: { createdAt: "desc" },
   });
 
@@ -44,6 +44,7 @@ export default async function ProductsPage() {
               <tr>
                 <th className="px-6 py-4 font-medium">เลขตัวถัง</th>
                 <th className="px-6 py-4 font-medium">รหัสถัง</th>
+                <th className="px-6 py-4 font-medium">ประเภทถัง</th>
                 <th className="px-6 py-4 font-medium">QR Code</th>
                 <th className="px-6 py-4 font-medium text-center">สถานะปัจจุบัน</th>
                 <th className="px-6 py-4 font-medium text-right">รายละเอียด</th>
@@ -65,6 +66,7 @@ export default async function ProductsPage() {
                       </Link>
                     </td>
                     <td className="px-6 py-4 text-gray-800">{c.cylinderCode || "-"}</td>
+                    <td className="px-6 py-4 text-gray-700">{c.product?.name || "-"}</td>
                     <td className="px-6 py-4 text-gray-700">{c.qrCode}</td>
                     <td className="px-6 py-4 text-center">
                       <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium 

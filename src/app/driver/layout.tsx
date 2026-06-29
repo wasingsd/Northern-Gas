@@ -1,11 +1,39 @@
 import { Home, ClipboardList, Settings, UserCircle, QrCode } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import prisma from "@/lib/prisma";
 
-export default function DriverLayout({
+export default async function DriverLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Get authenticated user for display
+  const supabase = await createClient();
+  const {
+    data: { user: supabaseUser },
+  } = await supabase.auth.getUser();
+
+  let userName = "คนขับรถ";
+  let userInitial = "D";
+
+  if (supabaseUser) {
+    const dbUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { supabaseId: supabaseUser.id },
+          { email: supabaseUser.email ?? "" },
+        ],
+      },
+      select: { name: true },
+    });
+
+    if (dbUser) {
+      userName = dbUser.name;
+      userInitial = dbUser.name.charAt(0).toUpperCase();
+    }
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-gray-100 font-sans selection:bg-blue-500/30">
       {/* Mobile App Header */}
@@ -15,9 +43,15 @@ export default function DriverLayout({
             <h1 className="text-2xl font-bold tracking-tight text-white">DELIVERIES</h1>
             <p className="text-xs text-gray-400 font-medium tracking-wide uppercase mt-0.5">Gas Store Driver App</p>
           </div>
-          <Link href="/login" className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-800 border border-gray-700 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors">
-            <UserCircle className="h-6 w-6" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <p className="text-sm font-medium text-white">{userName}</p>
+              <p className="text-xs text-gray-400">คนขับรถ</p>
+            </div>
+            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-800 border border-gray-700 text-white font-bold text-sm">
+              {userInitial}
+            </div>
+          </div>
         </div>
       </header>
 
@@ -43,7 +77,7 @@ export default function DriverLayout({
             <Home className="h-6 w-6" />
             <span className="text-[10px] font-medium tracking-wide">หน้าแรก</span>
           </Link>
-          
+
           <Link href="/driver" className="flex flex-col items-center gap-1 text-gray-500 hover:text-gray-300 transition-colors mr-8">
             <ClipboardList className="h-6 w-6" />
             <span className="text-[10px] font-medium tracking-wide">ประวัติ</span>

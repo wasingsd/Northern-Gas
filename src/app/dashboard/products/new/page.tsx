@@ -5,7 +5,9 @@ import { createCylinderAction } from "../../cylinders/actions";
 import prisma from "@/lib/prisma";
 
 export default async function NewProductPage() {
-
+  const products = await prisma.gasProduct.findMany({
+    orderBy: { name: "asc" }
+  });
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -24,6 +26,22 @@ export default async function NewProductPage() {
           <input type="hidden" name="redirectTo" value="/dashboard/products" />
 
           <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">ประเภทถังแก๊ส (Gas Product) <span className="text-red-500">*</span></label>
+              <select
+                name="productId"
+                required
+                className="w-full rounded-lg border border-border px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors bg-white"
+              >
+                <option value="">-- เลือกประเภทถังแก๊ส --</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({p.sizeKg} กก.)
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">เลขตัวถัง <span className="text-red-500">*</span></label>
               <input

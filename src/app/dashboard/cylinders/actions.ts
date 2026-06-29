@@ -2,22 +2,27 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
 import prisma from "@/lib/prisma";
+import { CylinderSchema } from "@/lib/validations";
 
 export async function createCylinderAction(formData: FormData) {
   const cylinderNo = formData.get("cylinderNo") as string;
   const qrCode = formData.get("qrCode") as string;
   const cylinderCode = formData.get("cylinderCode") as string;
+  const productId = formData.get("productId") as string;
   const redirectTo = formData.get("redirectTo") as string || "/dashboard/products";
   
-  if (!cylinderNo || !qrCode) throw new Error("Missing required fields");
+  const parsed = CylinderSchema.safeParse({ cylinderNo, qrCode, cylinderCode, productId });
+  if (!parsed.success) {
+    throw new Error(parsed.error.errors[0].message);
+  }
 
   const cylinder = await prisma.cylinder.create({
     data: {
       cylinderNo,
       qrCode,
       cylinderCode,
+      productId,
       status: "READY_TO_DISPATCH", // default status
     }
   });
@@ -38,9 +43,13 @@ export async function updateCylinderAction(id: string, formData: FormData) {
   const cylinderNo = formData.get("cylinderNo") as string;
   const qrCode = formData.get("qrCode") as string;
   const cylinderCode = formData.get("cylinderCode") as string;
+  const productId = formData.get("productId") as string;
   const redirectTo = formData.get("redirectTo") as string || `/dashboard/products/${id}`;
   
-  if (!cylinderNo || !qrCode) throw new Error("Missing required fields");
+  const parsed = CylinderSchema.safeParse({ cylinderNo, qrCode, cylinderCode, productId });
+  if (!parsed.success) {
+    throw new Error(parsed.error.errors[0].message);
+  }
 
   await prisma.cylinder.update({
     where: { id },
@@ -48,6 +57,7 @@ export async function updateCylinderAction(id: string, formData: FormData) {
       cylinderNo,
       qrCode,
       cylinderCode,
+      productId,
     }
   });
 

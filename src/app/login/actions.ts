@@ -1,12 +1,9 @@
 "use server";
 
-import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
 
-import prisma from "@/lib/prisma";
-
-export async function loginAction(prevState: any, formData: FormData) {
+export async function loginAction(prevState: unknown, formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
@@ -14,31 +11,24 @@ export async function loginAction(prevState: any, formData: FormData) {
     return { error: "กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน" };
   }
 
-  try {
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+  const supabase = await createClient();
 
-    if (!user) {
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    // Map common Supabase error codes to Thai messages
+    if (
+      error.message === "Invalid login credentials" ||
+      error.code === "invalid_credentials"
+    ) {
       return { error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" };
     }
-
-    const isValid = await bcrypt.compare(password, user.password);
-
-    if (!isValid) {
-      return { error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" };
+    if (error.code === "email_not_confirmed") {
+      return { error: "กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ" };
     }
-
-    // Set a simple cookie for MVP
-    const cookieStore = await cookies();
-    cookieStore.set("auth_token", user.id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7, // 1 week
-      path: "/",
-    });
-    
-  } catch (err) {
     return { error: "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง" };
   }
 
@@ -47,7 +37,7 @@ export async function loginAction(prevState: any, formData: FormData) {
 }
 
 export async function logoutAction() {
-  const cookieStore = await cookies();
-  cookieStore.delete("auth_token");
+  const supabase = await createClient();
+  await supabase.auth.signOut();
   redirect("/login");
 }

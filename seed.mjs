@@ -1,9 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient({
-  datasourceUrl: 'file:./dev.db',
-});
+const prisma = new PrismaClient();
 
 async function main() {
   console.log('Cleaning up existing data...');

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import prisma from "@/lib/prisma";
+import { CustomerSchema } from "@/lib/validations";
 
 export async function createCustomerAction(formData: FormData) {
   const name = formData.get("name") as string;
@@ -16,7 +17,10 @@ export async function createCustomerAction(formData: FormData) {
   const email = formData.get("email") as string;
   const address = formData.get("address") as string;
 
-  if (!name) throw new Error("Name is required");
+  const parsed = CustomerSchema.safeParse({ customerCode, name, phone, address });
+  if (!parsed.success) {
+    throw new Error(parsed.error.errors[0].message);
+  }
 
   await prisma.customer.create({
     data: {
@@ -46,7 +50,10 @@ export async function updateCustomerAction(id: string, formData: FormData) {
   const email = formData.get("email") as string;
   const address = formData.get("address") as string;
 
-  if (!name) throw new Error("Name is required");
+  const parsed = CustomerSchema.safeParse({ customerCode, name, phone, address });
+  if (!parsed.success) {
+    throw new Error(parsed.error.errors[0].message);
+  }
 
   await prisma.customer.update({
     where: { id },

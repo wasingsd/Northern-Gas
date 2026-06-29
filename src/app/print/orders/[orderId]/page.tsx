@@ -27,13 +27,7 @@ export default async function PrintOrderPage(props: { params: Promise<{ orderId:
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   });
 
-  // Group cylinders by cylinderCode (or fallback)
-  const groupedCylinders = order.cylinders.reduce((acc: any, cyl: any) => {
-    const code = cyl.cylinderCode || "ทั่วไป";
-    if (!acc[code]) acc[code] = [];
-    acc[code].push(cyl);
-    return acc;
-  }, {});
+  // Removed grouping by cylinderCode as requested
 
   return (
     <>
@@ -42,7 +36,7 @@ export default async function PrintOrderPage(props: { params: Promise<{ orderId:
         fontFamily: "'Sarabun', sans-serif",
         fontSize: "12px",
         color: "#000",
-        width: "48mm",
+        width: "57mm",
         margin: "0 auto",
         padding: "0"
       }}>
@@ -73,26 +67,14 @@ export default async function PrintOrderPage(props: { params: Promise<{ orderId:
         <div style={{ textAlign: "center", fontWeight: "bold" }}>รายการสินค้า</div>
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         
-        {Object.entries(groupedCylinders).map(([code, cyls]: [string, any], index) => (
-          <div key={code} style={{ marginTop: "8px" }}>
-            <div style={{ fontWeight: "bold", fontSize: "13px" }}>{index + 1}. {code}</div>
-            <div style={{ fontSize: "11px", marginBottom: "2px" }}>ท่อแก๊ส</div>
-            <div style={{ fontWeight: "bold", textAlign: "right", marginBottom: "4px" }}>
-              จำนวน: {cyls.length} ใบ
+        <div style={{ marginTop: "8px", padding: "0 4px" }}>
+          {order.cylinders.map((c: any, i: number) => (
+            <div key={c.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "4px" }}>
+              <div>{i + 1}. {c.cylinderNo}</div>
+              <div>1 ใบ</div>
             </div>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "2px",
-              fontSize: "10px",
-              paddingLeft: "8px"
-            }}>
-              {cyls.map((c: any, i: number) => (
-                <div key={c.id}>{i + 1}. {c.cylinderNo}</div>
-              ))}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
         
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         <div style={{ marginBottom: "2px", fontWeight: "bold" }}>รวมบาร์โค้ดทั้งหมด: {order.cylinders.length} บาร์โค้ด</div>

@@ -10,9 +10,10 @@ datasource db {
 
 model User {
   id           String        @id @default(cuid())
+  supabaseId   String?       @unique // links to Supabase auth.uid()
   name         String
   email        String        @unique
-  password     String
+  password     String        @default("") // kept for migration safety; auth handled by Supabase
   role         String        @default("OWNER")
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -48,12 +49,14 @@ model Cylinder {
   status            String
   currentCustomerId String?
   orderId           String?
+  productId         String?
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
   refillBatchId     String?
   refillBatch       RefillBatch?  @relation(fields: [refillBatchId], references: [id])
   order             Order?        @relation(fields: [orderId], references: [id])
   currentCustomer   Customer?     @relation(fields: [currentCustomerId], references: [id])
+  product           GasProduct?   @relation(fields: [productId], references: [id])
   logs              CylinderLog[]
 }
 
@@ -85,6 +88,7 @@ model Order {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   cylinders   Cylinder[]
+  items       OrderItem[]
   deliveryJob DeliveryJob?
   customer    Customer     @relation(fields: [customerId], references: [id])
 }
@@ -101,4 +105,25 @@ model DeliveryJob {
   updatedAt   DateTime  @updatedAt
   driver      User?     @relation(fields: [driverId], references: [id])
   order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model GasProduct {
+  id          String       @id @default(cuid())
+  name        String
+  sizeKg      Float
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  cylinders   Cylinder[]
+  orderItems  OrderItem[]
+}
+
+model OrderItem {
+  id          String     @id @default(cuid())
+  orderId     String
+  productId   String
+  quantity    Int
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  order       Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     GasProduct @relation(fields: [productId], references: [id])
 }

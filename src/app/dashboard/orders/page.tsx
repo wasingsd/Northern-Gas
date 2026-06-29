@@ -1,6 +1,7 @@
 import { Plus, Search, CheckCircle2, Clock } from "lucide-react";
 import Link from "next/link";
 import { markOrderAsReadyAction } from "./actions";
+import CancelOrderButton from "./CancelOrderButton";
 
 import prisma from "@/lib/prisma";
 
@@ -108,11 +109,14 @@ export default async function OrdersPage() {
                     </td>
                     <td className="px-6 py-4 text-center space-y-2">
                       {o.status === "PENDING" && (
-                        <form action={markOrderAsReadyAction.bind(null, o.id)}>
-                          <button type="submit" className="w-full rounded bg-blue-600 text-white text-xs py-1.5 font-medium hover:bg-blue-700 transition-colors">
-                            พร้อมส่ง
-                          </button>
-                        </form>
+                        <div className="flex items-center gap-2">
+                          <form action={markOrderAsReadyAction.bind(null, o.id)} className="flex-1">
+                            <button type="submit" className="w-full rounded bg-blue-600 text-white text-xs py-1.5 font-medium hover:bg-blue-700 transition-colors">
+                              พร้อมส่ง
+                            </button>
+                          </form>
+                          <CancelOrderButton orderId={o.id} />
+                        </div>
                       )}
                       {o.status !== "PENDING" && (
                         <a 
