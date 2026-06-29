@@ -3,24 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { ScanLine, Trash2, Package } from "lucide-react";
 
-type Product = {
-  id: string;
-  name: string;
-  sizeKg: number;
-  salePrice: number;
-  deliveryFee: number;
-};
-
 type Cylinder = {
   id: string;
-  assetCode: string;
+  cylinderNo: string;
   qrCode: string;
   status: string;
-  productId: string | null;
-  product: Product | null;
 };
 
-export default function OrderItemsForm({ products, cylinders, initialItems }: { products: any[], cylinders: any[], initialItems?: any[] }) {
+export default function OrderItemsForm({ cylinders, initialItems }: { cylinders: any[], initialItems?: any[] }) {
   const [scannedCylinders, setScannedCylinders] = useState<Cylinder[]>(initialItems || []);
   const [inputValue, setInputValue] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -37,23 +27,13 @@ export default function OrderItemsForm({ products, cylinders, initialItems }: { 
       const code = inputValue.trim();
       if (!code) return;
 
-      // Find cylinder by qrCode or assetCode
-      const foundCylinder = cylinders.find(c => c.qrCode === code || c.assetCode === code);
+      // Find cylinder by qrCode or cylinderNo
+      const foundCylinder = cylinders.find(c => c.qrCode === code || c.cylinderNo === code);
 
       if (!foundCylinder) {
         setErrorMsg(`ไม่พบถังแก๊สที่มีรหัส: ${code}`);
         setInputValue("");
         return;
-      }
-
-      if (!foundCylinder.product) {
-        setErrorMsg(`ถังแก๊สรหัส ${code} ยังไม่ได้ระบุประเภทสินค้า`);
-        setInputValue("");
-        return;
-      }
-
-      if (foundCylinder.status === 'WITH_CUSTOMER') {
-        // Technically can still deliver, but might be a warning. Let's just allow it for now.
       }
 
       if (scannedCylinders.some(c => c.id === foundCylinder.id)) {
@@ -71,16 +51,6 @@ export default function OrderItemsForm({ products, cylinders, initialItems }: { 
   const removeCylinder = (id: string) => {
     setScannedCylinders(scannedCylinders.filter(c => c.id !== id));
   };
-
-  // Group by product for summary
-  const summary = scannedCylinders.reduce((acc, cyl) => {
-    const pId = cyl.productId!;
-    if (!acc[pId]) {
-      acc[pId] = { product: cyl.product!, count: 0 };
-    }
-    acc[pId].count += 1;
-    return acc;
-  }, {} as Record<string, { product: Product, count: number }>);
 
   // The form will submit this hidden input containing the array of cylinder IDs
   const cylinderIds = scannedCylinders.map(c => c.id);
@@ -134,14 +104,13 @@ export default function OrderItemsForm({ products, cylinders, initialItems }: { 
               <tr>
                 <th className="px-4 py-3 w-16 text-center">ลำดับ</th>
                 <th className="px-4 py-3">รหัสถัง (Asset / QR)</th>
-                <th className="px-4 py-3">ประเภทสินค้า</th>
                 <th className="px-4 py-3 w-12"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {scannedCylinders.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
                     ยังไม่มีสินค้าในรายการ กรุณาสแกนบาร์โค้ด
                   </td>
                 </tr>
@@ -150,11 +119,8 @@ export default function OrderItemsForm({ products, cylinders, initialItems }: { 
                   <tr key={cyl.id} className="bg-white hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 text-center text-gray-500">{index + 1}</td>
                     <td className="px-4 py-3">
-                      <div className="font-medium text-gray-900">{cyl.assetCode}</div>
+                      <div className="font-medium text-gray-900">{cyl.cylinderNo}</div>
                       <div className="text-xs text-gray-500">{cyl.qrCode}</div>
-                    </td>
-                    <td className="px-4 py-3">
-                      {cyl.product ? `${cyl.product.name} (${cyl.product.sizeKg} กก.)` : 'ไม่ระบุ'}
                     </td>
                     <td className="px-4 py-3 text-center">
                       <button
@@ -177,25 +143,7 @@ export default function OrderItemsForm({ products, cylinders, initialItems }: { 
       <div className="w-full lg:w-80 shrink-0 bg-gray-50 rounded-xl border border-border p-4 h-fit sticky top-6">
         <h3 className="font-bold text-foreground mb-4">สรุปรายการสินค้า</h3>
         
-        {Object.keys(summary).length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-4">ยังไม่มีสินค้า</p>
-        ) : (
-          <div className="space-y-3 mb-6">
-            {Object.values(summary).map(item => (
-              <div key={item.product.id} className="flex justify-between items-center bg-white p-3 rounded-lg border border-border shadow-sm">
-                <div>
-                  <p className="font-medium text-foreground text-sm">{item.product.name}</p>
-                  <p className="text-xs text-gray-500">{item.product.sizeKg} กก.</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-sm font-bold text-gray-900">x {item.count}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        
-        <div className="border-t border-border pt-4">
+        <div className="border-t border-border pt-4 mt-4">
           <div className="flex justify-between items-center">
             <span className="text-gray-600 font-medium">จำนวนถังทั้งหมด</span>
             <span className="text-xl font-bold text-primary">

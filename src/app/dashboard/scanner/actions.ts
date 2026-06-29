@@ -1,8 +1,7 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export async function processScanAction(qrCode: string, mode: string, customerId?: string) {
   if (!qrCode) throw new Error("Please provide a QR Code");
@@ -56,6 +55,6 @@ export async function processScanAction(qrCode: string, mode: string, customerId
 
   return { 
     success: true, 
-    message: `สแกนสำเร็จ: อัปเดตถัง ${cylinder.assetCode} เป็นสถานะ ${newStatus}` 
+    message: `สแกนสำเร็จ: อัปเดตถัง ${cylinder.cylinderNo} เป็นสถานะ ${newStatus}` 
   };
 }

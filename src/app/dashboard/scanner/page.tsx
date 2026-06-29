@@ -1,7 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import ScannerClient from "./ScannerClient";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function ScannerPage() {
   const customers = await prisma.customer.findMany({

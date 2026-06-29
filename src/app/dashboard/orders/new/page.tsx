@@ -1,16 +1,14 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { PrismaClient } from "@prisma/client";
 import { createOrderAction } from "../actions";
 import OrderItemsForm from "./OrderItemsForm";
 import CustomerSection from "./CustomerSection";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function NewOrderPage() {
   const customers = await prisma.customer.findMany({ orderBy: { name: "asc" } });
-  const products = await prisma.gasProduct.findMany({ where: { active: true }, orderBy: { sizeKg: "asc" } });
-  const cylinders = await prisma.cylinder.findMany({ include: { product: true } });
+  const cylinders = await prisma.cylinder.findMany();
 
   return (
     <div className="space-y-6">
@@ -19,8 +17,8 @@ export default async function NewOrderPage() {
           <ArrowLeft className="h-5 w-5 text-gray-700" />
         </Link>
         <div>
-          <h2 className="text-2xl font-bold text-foreground">สร้างออเดอร์ใหม่</h2>
-          <p className="text-sm text-gray-500">บันทึกคำสั่งซื้อและสร้างใบงานจัดส่ง</p>
+          <h2 className="text-2xl font-bold text-foreground">บันทึกการเบิกส่งถัง</h2>
+          <p className="text-sm text-gray-500">บันทึกรายการถังแก๊สที่ถูกส่งให้ลูกค้า</p>
         </div>
       </div>
 
@@ -28,7 +26,7 @@ export default async function NewOrderPage() {
         <form action={createOrderAction} className="p-6 space-y-6">
           <CustomerSection customers={customers} />
           
-          <OrderItemsForm products={products} cylinders={cylinders} />
+          <OrderItemsForm cylinders={cylinders} />
 
           <div className="pt-4 flex items-center justify-end gap-3 border-t border-border">
             <Link
@@ -41,7 +39,7 @@ export default async function NewOrderPage() {
               type="submit"
               className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors"
             >
-              ยืนยันสร้างออเดอร์
+              บันทึกรายการส่งถัง
             </button>
           </div>
         </form>

@@ -1,9 +1,8 @@
-import { PrismaClient } from "@prisma/client";
 import Link from "next/link";
 import { Plus, CheckCircle2, Clock } from "lucide-react";
 import ReceiveBatchButton from "./ReceiveBatchButton";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function RefillPage() {
   const batches = await prisma.refillBatch.findMany({

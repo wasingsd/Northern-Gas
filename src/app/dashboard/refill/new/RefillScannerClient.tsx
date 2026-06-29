@@ -37,7 +37,7 @@ export default function RefillScannerClient() {
       const res = await scanCylinderForRefill(code);
       if (res.success && res.cylinder) {
         setScannedCylinders([res.cylinder, ...scannedCylinders]);
-        setMessage({ text: `สแกนสำเร็จ: เพิ่มถัง ${res.cylinder.assetCode} แล้ว`, type: "success" });
+        setMessage({ text: `สแกนสำเร็จ: เพิ่มถัง ${res.cylinder.cylinderNo} แล้ว`, type: "success" });
       } else {
         setMessage({ text: res.message || "เกิดข้อผิดพลาด", type: "error" });
       }
@@ -140,7 +140,7 @@ export default function RefillScannerClient() {
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium text-gray-500">{scannedCylinders.length - i}.</span>
                     <div>
-                      <p className="text-sm font-bold text-foreground">{cyl.assetCode}</p>
+                      <p className="text-sm font-bold text-foreground">{cyl.cylinderNo}</p>
                       <p className="text-xs text-gray-500">QR: {cyl.qrCode}</p>
                     </div>
                   </div>

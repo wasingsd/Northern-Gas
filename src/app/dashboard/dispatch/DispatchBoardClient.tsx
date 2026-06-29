@@ -51,10 +51,9 @@ export default function DispatchBoardClient({ initialJobs }: { initialJobs: any[
                   </div>
 
                   <div className="bg-surface p-2 rounded text-xs mb-3 space-y-1">
-                    {job.order.items.map((item: any) => (
-                      <div key={item.id} className="flex justify-between text-gray-700">
-                        <span>{item.product.name}</span>
-                        <span className="font-medium">x{item.quantity}</span>
+                    {job.order.cylinders.map((cyl: any) => (
+                      <div key={cyl.id} className="flex justify-between text-gray-700">
+                        <span>{cyl.cylinderNo}</span>
                       </div>
                     ))}
                   </div>

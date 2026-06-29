@@ -1,14 +1,13 @@
-import { PrismaClient } from "@prisma/client";
 import { Truck, MapPin, Phone, CheckCircle2, User } from "lucide-react";
 import DispatchBoardClient from "./DispatchBoardClient";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function DispatchPage() {
   const jobs = await prisma.deliveryJob.findMany({
     include: {
       order: {
-        include: { customer: true, items: { include: { product: true } } }
+        include: { customer: true, cylinders: true }
       },
       driver: true,
     },

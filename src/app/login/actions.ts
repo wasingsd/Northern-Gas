@@ -1,11 +1,10 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export async function loginAction(prevState: any, formData: FormData) {
   const email = formData.get("email") as string;
@@ -45,4 +44,10 @@ export async function loginAction(prevState: any, formData: FormData) {
 
   // Redirect must be outside try/catch in Next.js
   redirect("/dashboard");
+}
+
+export async function logoutAction() {
+  const cookieStore = await cookies();
+  cookieStore.delete("auth_token");
+  redirect("/login");
 }

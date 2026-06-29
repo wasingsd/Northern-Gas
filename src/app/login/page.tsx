@@ -29,7 +29,6 @@ export default function LoginPage() {
               <input
                 type="email"
                 name="email"
-                defaultValue="pluypt@gmail.com"
                 placeholder="you@example.com"
                 className="w-full rounded-lg border border-border pl-10 pr-4 py-2.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 required
@@ -44,7 +43,6 @@ export default function LoginPage() {
               <input
                 type="password"
                 name="password"
-                defaultValue="Admin9999"
                 placeholder="••••••••"
                 className="w-full rounded-lg border border-border pl-10 pr-4 py-2.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 required

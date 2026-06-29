@@ -1,10 +1,9 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export async function createCustomerAction(formData: FormData) {
   const name = formData.get("name") as string;
@@ -34,7 +33,6 @@ export async function createCustomerAction(formData: FormData) {
   });
 
   revalidatePath("/dashboard/customers");
-  redirect("/dashboard/customers");
 }
 
 export async function updateCustomerAction(id: string, formData: FormData) {
@@ -66,7 +64,6 @@ export async function updateCustomerAction(id: string, formData: FormData) {
   });
 
   revalidatePath("/dashboard/customers");
-  redirect("/dashboard/customers");
 }
 
 export async function deleteCustomerAction(id: string) {

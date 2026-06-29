@@ -1,10 +1,9 @@
-import { PrismaClient } from "@prisma/client";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, User, MapPin, Phone, Mail, Package, Truck, Receipt } from "lucide-react";
 import dayjs from "dayjs";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function OrderDetailsPage({ params }: { params: Promise<{ orderId: string }> }) {
   const { orderId } = await params;
@@ -13,9 +12,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
     where: { id: orderId },
     include: {
       customer: true,
-      items: {
-        include: { product: true }
-      },
+      cylinders: true,
       deliveryJob: {
         include: { driver: true }
       }
@@ -45,11 +42,11 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
           </Link>
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold text-foreground">รายละเอียดออเดอร์ #{order.orderNo}</h2>
+              <h2 className="text-2xl font-bold text-foreground">รายละเอียดรายการส่งถัง #{order.orderNo}</h2>
               {getStatusBadge(order.status)}
             </div>
             <p className="text-sm text-gray-500">
-              วันที่สั่งซื้อ: {dayjs(order.createdAt).format("DD/MM/YYYY HH:mm")}
+              วันที่บันทึก: {dayjs(order.createdAt).format("DD/MM/YYYY HH:mm")}
             </p>
           </div>
         </div>
@@ -59,7 +56,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
             href={`/dashboard/orders/${order.id}/edit`}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-border rounded-lg hover:bg-gray-50 transition-colors"
           >
-            แก้ไขออเดอร์
+            แก้ไขรายการส่งถัง
           </Link>
         )}
       </div>
@@ -159,17 +156,21 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
         <table className="w-full text-left text-sm">
           <thead className="bg-gray-50 text-gray-700">
             <tr>
-              <th className="px-6 py-3 font-medium">รหัสสินค้า</th>
-              <th className="px-6 py-3 font-medium">ชื่อสินค้า</th>
-              <th className="px-6 py-3 font-medium text-center">จำนวน</th>
+              <th className="px-6 py-3 font-medium w-16 text-center">ลำดับ</th>
+              <th className="px-6 py-3 font-medium">เลขตัวถัง</th>
+              <th className="px-6 py-3 font-medium">QR Code</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {order.items.map(item => (
-              <tr key={item.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 text-gray-500">{item.product.id.slice(-6).toUpperCase()}</td>
-                <td className="px-6 py-4 font-medium">{item.product.name} ({item.product.sizeKg} กก.)</td>
-                <td className="px-6 py-4 text-center">{item.quantity} ถัง</td>
+            {order.cylinders.map((cyl, index) => (
+              <tr key={cyl.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 text-center text-gray-500">{index + 1}</td>
+                <td className="px-6 py-4 font-medium">
+                  <Link href={`/dashboard/products/${cyl.id}`} className="text-primary hover:underline hover:text-primary-hover">
+                    {cyl.cylinderNo}
+                  </Link>
+                </td>
+                <td className="px-6 py-4 text-gray-500">{cyl.qrCode}</td>
               </tr>
             ))}
           </tbody>
@@ -179,8 +180,8 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
         <div className="bg-gray-50 p-6 border-t border-border flex justify-end">
           <div className="w-64 space-y-3">
             <div className="flex justify-between text-lg font-bold text-foreground pt-3">
-              <span className="flex items-center gap-2"><Package className="h-5 w-5" /> รวมจำนวนสินค้า:</span>
-              <span className="text-primary">{order.items.reduce((sum, item) => sum + item.quantity, 0)} ถัง</span>
+              <span className="flex items-center gap-2"><Package className="h-5 w-5" /> รวมจำนวนถัง:</span>
+              <span className="text-primary">{order.cylinders.length} ใบ</span>
             </div>
           </div>
         </div>

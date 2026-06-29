@@ -1,9 +1,8 @@
 import { User } from "lucide-react";
 import CustomerForm from "../../CustomerForm";
-import { PrismaClient } from "@prisma/client";
 import { notFound } from "next/navigation";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function EditCustomerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

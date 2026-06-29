@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import { Plus, Search, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function CustomersPage() {
   const customers = await prisma.customer.findMany({
@@ -37,7 +36,8 @@ export default async function CustomersPage() {
           </div>
         </div>
         
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-surface text-gray-700">
               <tr>
@@ -45,7 +45,7 @@ export default async function CustomersPage() {
                 <th className="px-6 py-4 font-medium">ชื่อลูกค้า</th>
                 <th className="px-6 py-4 font-medium">ติดต่อ</th>
                 <th className="px-6 py-4 font-medium">ประเภทผู้เสียภาษี</th>
-                <th className="px-6 py-4 font-medium">จัดการ</th>
+                <th className="px-6 py-4 font-medium text-center">จัดการ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -88,8 +88,8 @@ export default async function CustomersPage() {
                          c.taxType === 'INDIVIDUAL' ? 'บุคคลธรรมดา' : 'ไม่ระบุ'}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <Link href={`/dashboard/customers/${c.id}/edit`} className="text-primary hover:underline text-sm font-medium">
+                    <td className="px-6 py-4 text-center">
+                      <Link href={`/dashboard/customers/${c.id}/edit`} className="inline-block p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
                         แก้ไข
                       </Link>
                     </td>
@@ -98,6 +98,55 @@ export default async function CustomersPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden flex flex-col divide-y divide-border">
+          {customers.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              ยังไม่มีข้อมูลลูกค้า
+            </div>
+          ) : (
+            customers.map((c) => (
+              <div key={c.id} className="p-4 space-y-3 bg-white">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="font-bold text-foreground text-lg">{c.name}</div>
+                    <div className="text-sm font-medium text-gray-500 mt-0.5">รหัส: {c.customerCode || "-"}</div>
+                  </div>
+                  <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
+                    c.taxType === 'CORPORATE' ? 'bg-blue-100 text-blue-800' : 
+                    c.taxType === 'INDIVIDUAL' ? 'bg-green-100 text-green-800' : 
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {c.taxType === 'CORPORATE' ? 'นิติบุคคล' : 
+                     c.taxType === 'INDIVIDUAL' ? 'บุคคลธรรมดา' : 'ไม่ระบุ'}
+                  </span>
+                </div>
+                
+                <div className="flex flex-col gap-2 pt-1">
+                  {c.phone && (
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <Phone className="h-4 w-4 text-gray-400" />
+                      {c.phone}
+                    </div>
+                  )}
+                  {c.taxId && (
+                    <div className="text-sm text-gray-500">Tax ID: {c.taxId}</div>
+                  )}
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <Link 
+                    href={`/dashboard/customers/${c.id}/edit`}
+                    className="flex items-center gap-2 px-4 py-2 text-blue-700 bg-blue-50 rounded-lg font-medium active:bg-blue-100 transition-colors"
+                  >
+                    แก้ไข
+                  </Link>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

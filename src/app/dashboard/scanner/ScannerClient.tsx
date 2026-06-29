@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { ScanLine, CheckCircle2, XCircle } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { ScanLine, CheckCircle2, XCircle, Camera } from "lucide-react";
 import { processScanAction } from "./actions";
+import dynamic from "next/dynamic";
+
+const CameraScanner = dynamic(() => import("./CameraScanner"), { ssr: false });
 
 export default function ScannerClient({ customers }: { customers: any[] }) {
   const [mode, setMode] = useState("RECEIVE_EMPTY");
@@ -10,15 +13,43 @@ export default function ScannerClient({ customers }: { customers: any[] }) {
   const [inputValue, setInputValue] = useState("");
   const [message, setMessage] = useState<{ text: string, type: "success" | "error" | "" }>({ text: "", type: "" });
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto focus input when mode changes to keep it ready for the scanner gun
   useEffect(() => {
-    if (inputRef.current) {
+    if (inputRef.current && !isCameraOpen) {
       inputRef.current.focus();
     }
-  }, [mode]);
+  }, [mode, isCameraOpen]);
+
+  const handleCameraScan = async (decodedText: string) => {
+    setIsCameraOpen(false);
+    setInputValue(decodedText);
+    
+    if (mode === "DELIVER" && !customerId) {
+      setMessage({ text: "กรุณาเลือกลูกค้าก่อนทำการสแกนส่งถัง", type: "error" });
+      return;
+    }
+
+    setIsProcessing(true);
+    setMessage({ text: "กำลังประมวลผล...", type: "" });
+
+    try {
+      const res = await processScanAction(decodedText, mode, customerId);
+      if (res.success) {
+        setMessage({ text: res.message, type: "success" });
+      } else {
+        setMessage({ text: res.message, type: "error" });
+      }
+    } catch (error) {
+      setMessage({ text: "เกิดข้อผิดพลาดในการเชื่อมต่อ", type: "error" });
+    } finally {
+      setIsProcessing(false);
+      setInputValue("");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,10 +132,19 @@ export default function ScannerClient({ customers }: { customers: any[] }) {
 
       {/* Scanner Input */}
       <div className="bg-white p-6 rounded-xl border border-border shadow-sm flex flex-col">
-        <label className="block text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-          <ScanBarcodeIcon /> 
-          {mode === "DELIVER" ? "3. ยิงบาร์โค้ดที่ถังแก๊ส" : "2. ยิงบาร์โค้ดที่ถังแก๊ส"}
-        </label>
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-sm font-bold text-foreground flex items-center gap-2">
+            <ScanBarcodeIcon /> 
+            {mode === "DELIVER" ? "3. ยิงบาร์โค้ดที่ถังแก๊ส" : "2. ยิงบาร์โค้ดที่ถังแก๊ส"}
+          </label>
+          <button 
+            type="button" 
+            onClick={() => setIsCameraOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-bold hover:bg-blue-100 transition-colors"
+          >
+            <Camera className="h-4 w-4" /> เปิดกล้อง
+          </button>
+        </div>
         
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
           <div className="relative mb-4">
@@ -115,8 +155,9 @@ export default function ScannerClient({ customers }: { customers: any[] }) {
               onChange={(e) => setInputValue(e.target.value)}
               disabled={isProcessing}
               autoFocus
+              inputMode="none"
               className="w-full rounded-lg border-2 border-primary/50 px-4 py-8 text-center text-xl tracking-widest focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/20 bg-primary/5 placeholder:text-gray-400 placeholder:text-base placeholder:tracking-normal transition-all"
-              placeholder="ให้ Cursor อยู่ที่นี่ แล้วยิงสแกนเนอร์"
+              placeholder="แตะที่นี่เพื่อพร้อมสแกน (คีย์บอร์ดจะไม่เด้ง)"
             />
             {isProcessing && (
               <div className="absolute inset-y-0 right-4 flex items-center">
@@ -152,6 +193,13 @@ export default function ScannerClient({ customers }: { customers: any[] }) {
           </div>
         </form>
       </div>
+
+      {isCameraOpen && (
+        <CameraScanner 
+          onScanSuccess={handleCameraScan} 
+          onClose={() => setIsCameraOpen(false)} 
+        />
+      )}
     </div>
   );
 }

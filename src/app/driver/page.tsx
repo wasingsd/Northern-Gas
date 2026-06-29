@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import Link from "next/link";
 import { MapPin, Info, Navigation2, CheckCircle2, Clock } from "lucide-react";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function DriverJobsPage() {
   // Get jobs that are WAITING or OUT_FOR_DELIVERY
@@ -14,9 +13,7 @@ export default async function DriverJobsPage() {
       order: {
         include: {
           customer: true,
-          items: {
-            include: { product: true }
-          }
+          cylinders: true
         }
       }
     },
@@ -78,7 +75,7 @@ export default async function DriverJobsPage() {
 
 function JobCard({ job, isMyJob }: { job: any, isMyJob: boolean }) {
   const customer = job.order.customer;
-  const itemCount = job.order.items.reduce((sum: number, item: any) => sum + item.quantity, 0);
+  const itemCount = job.order.cylinders.length;
 
   return (
     <div className={`relative overflow-hidden rounded-3xl p-5 ${

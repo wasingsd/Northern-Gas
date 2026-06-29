@@ -1,10 +1,9 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 // Receive a scanned QR code and return cylinder info
 export async function scanCylinderForRefill(qrCode: string) {

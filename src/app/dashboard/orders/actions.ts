@@ -1,10 +1,9 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export async function createOrderAction(formData: FormData) {
   const customerName = formData.get("customerName") as string;
@@ -59,52 +58,15 @@ export async function createOrderAction(formData: FormData) {
     });
   }
 
-  // Calculate order items from cylinders
-  const cylinders = await prisma.cylinder.findMany({
-    where: { id: { in: cylinderIds } },
-    include: { product: true }
-  });
-
-  let totalPrice = 0;
-  const orderItemsMap = new Map<string, { productId: string, quantity: number, unitPrice: number, totalPrice: number }>();
-  
-  for (const cylinder of cylinders) {
-     const product = cylinder.product;
-     if (product) {
-        totalPrice += product.salePrice + product.deliveryFee;
-        
-        const existing = orderItemsMap.get(product.id);
-        if (existing) {
-           existing.quantity += 1;
-           existing.totalPrice += product.salePrice;
-        } else {
-           orderItemsMap.set(product.id, {
-             productId: product.id,
-             quantity: 1,
-             unitPrice: product.salePrice,
-             totalPrice: product.salePrice
-           });
-        }
-     }
-  }
-
-  const orderItemsData = Array.from(orderItemsMap.values());
-  if (orderItemsData.length === 0) throw new Error("No valid products found for the scanned cylinders");
-
-  // Create Order, OrderItem, and DeliveryJob
-  const orderNo = `ORD-${Date.now().toString().slice(-6)}`;
+  // Create Order and DeliveryJob
+  const orderNo = `DSP-${Date.now().toString().slice(-6)}`; // Dispatch number
   const jobNo = `JOB-${Date.now().toString().slice(-6)}`;
 
   const order = await prisma.order.create({
     data: {
       orderNo,
       customerId: customer.id,
-      totalAmount: totalPrice,
       status: "PENDING",
-      paymentStatus: "UNPAID",
-      items: {
-        create: orderItemsData
-      },
       deliveryJob: {
         create: {
           jobNo,
@@ -128,7 +90,7 @@ export async function createOrderAction(formData: FormData) {
   const logs = cylinderIds.map(cId => ({
     cylinderId: cId,
     status: "READY_TO_DISPATCH",
-    notes: `เตรียมจัดส่งสำหรับออเดอร์ ${orderNo}`
+    notes: `บันทึกรายการส่งถัง ${orderNo}`
   }));
   
   await prisma.cylinderLog.createMany({
@@ -187,38 +149,6 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
     data: customerDataToUpdate
   });
 
-  // Calculate order items from cylinders
-  const cylinders = await prisma.cylinder.findMany({
-    where: { id: { in: cylinderIds } },
-    include: { product: true }
-  });
-
-  let totalPrice = 0;
-  const orderItemsMap = new Map<string, { productId: string, quantity: number, unitPrice: number, totalPrice: number }>();
-  
-  for (const cylinder of cylinders) {
-     const product = cylinder.product;
-     if (product) {
-        totalPrice += product.salePrice + product.deliveryFee;
-        
-        const existing = orderItemsMap.get(product.id);
-        if (existing) {
-           existing.quantity += 1;
-           existing.totalPrice += product.salePrice;
-        } else {
-           orderItemsMap.set(product.id, {
-             productId: product.id,
-             quantity: 1,
-             unitPrice: product.salePrice,
-             totalPrice: product.salePrice
-           });
-        }
-     }
-  }
-
-  const orderItemsData = Array.from(orderItemsMap.values());
-  if (orderItemsData.length === 0) throw new Error("No valid products found for the scanned cylinders");
-
   // Reset old cylinders
   if (order.cylinders && order.cylinders.length > 0) {
     await prisma.cylinder.updateMany({
@@ -226,22 +156,6 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
       data: { orderId: null, status: "READY_TO_DISPATCH" }
     });
   }
-
-  // Delete existing items
-  await prisma.orderItem.deleteMany({
-    where: { orderId: order.id }
-  });
-
-  // Create new items and update total
-  await prisma.order.update({
-    where: { id: order.id },
-    data: {
-      totalAmount: totalPrice,
-      items: {
-        create: orderItemsData
-      }
-    }
-  });
 
   // Update Cylinders with Order ID and change status
   await prisma.cylinder.updateMany({
@@ -256,7 +170,7 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
   const logs = cylinderIds.map(cId => ({
     cylinderId: cId,
     status: "READY_TO_DISPATCH",
-    notes: `แก้ไขออเดอร์ (เตรียมจัดส่งสำหรับออเดอร์ ${order.orderNo})`
+    notes: `แก้ไขรายการส่งถัง (${order.orderNo})`
   }));
   
   await prisma.cylinderLog.createMany({

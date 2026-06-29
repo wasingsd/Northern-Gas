@@ -1,16 +1,13 @@
-import { PrismaClient } from "@prisma/client";
 import { Plus, Search, CheckCircle2, Clock } from "lucide-react";
 import Link from "next/link";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function OrdersPage() {
   const orders = await prisma.order.findMany({
     include: {
       customer: true,
-      items: {
-        include: { product: true }
-      },
+      cylinders: true,
       deliveryJob: true,
     },
     orderBy: { createdAt: "desc" },
@@ -20,15 +17,15 @@ export default async function OrdersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">คำสั่งซื้อ (Orders)</h2>
-          <p className="text-sm text-gray-500">จัดการรายการสั่งซื้อแก๊สของลูกค้า</p>
+          <h2 className="text-2xl font-bold text-foreground">บันทึกส่งถัง (Dispatch)</h2>
+          <p className="text-sm text-gray-500">จัดการรายการส่งถังแก๊สให้ลูกค้า</p>
         </div>
         <Link
           href="/dashboard/orders/new"
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover transition-colors"
         >
           <Plus className="h-4 w-4" />
-          สร้างออเดอร์ใหม่
+          สร้างรายการส่งถัง
         </Link>
       </div>
 
@@ -74,12 +71,8 @@ export default async function OrdersPage() {
                       <div className="font-medium text-foreground">{o.customer.name}</div>
                       <div className="text-xs text-gray-500 line-clamp-1">{o.customer.address || "-"}</div>
                     </td>
-                    <td className="px-6 py-4">
-                      {o.items.map(item => (
-                        <div key={item.id} className="text-gray-700">
-                          {item.product.name} x {item.quantity}
-                        </div>
-                      ))}
+                    <td className="px-6 py-4 text-gray-700">
+                      จำนวน {o.cylinders.length} ถัง
                     </td>
 
                     <td className="px-6 py-4 text-center">

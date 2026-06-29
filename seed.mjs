@@ -62,27 +62,27 @@ async function main() {
 
   console.log('Seeding Products...');
   const product4kg = await prisma.gasProduct.create({
-    data: { name: 'แก๊ส ปตท. 4 กก.', sizeKg: 4, salePrice: 180, deliveryFee: 20 }
+    data: { name: 'แก๊ส ปตท. 4 กก.', sizeKg: 4 }
   });
   const product7kg = await prisma.gasProduct.create({
-    data: { name: 'แก๊ส ปตท. 7 กก.', sizeKg: 7, salePrice: 250, deliveryFee: 20 }
+    data: { name: 'แก๊ส ปตท. 7 กก.', sizeKg: 7 }
   });
   const product15kg = await prisma.gasProduct.create({
-    data: { name: 'แก๊ส ปตท. 15 กก.', sizeKg: 15, salePrice: 420, deliveryFee: 30 }
+    data: { name: 'แก๊ส ปตท. 15 กก.', sizeKg: 15 }
   });
   const product48kg = await prisma.gasProduct.create({
-    data: { name: 'แก๊ส ปตท. 48 กก.', sizeKg: 48, salePrice: 1350, deliveryFee: 50 }
+    data: { name: 'แก๊ส ปตท. 48 กก.', sizeKg: 48 }
   });
 
   console.log('Seeding Cylinders...');
   const cyl1 = await prisma.cylinder.create({
-    data: { assetCode: 'PTT-15-001', qrCode: 'QR-15-001', status: 'READY_TO_DISPATCH', productId: product15kg.id }
+    data: { cylinderNo: 'PTT-15-001', cylinderCode: 'CODE-001', qrCode: 'QR-15-001', status: 'READY_TO_DISPATCH', productId: product15kg.id }
   });
   const cyl2 = await prisma.cylinder.create({
-    data: { assetCode: 'PTT-15-002', qrCode: 'QR-15-002', status: 'WITH_CUSTOMER', currentCustomerId: customer1.id, productId: product15kg.id }
+    data: { cylinderNo: 'PTT-15-002', cylinderCode: 'CODE-002', qrCode: 'QR-15-002', status: 'WITH_CUSTOMER', currentCustomerId: customer1.id, productId: product15kg.id }
   });
   const cyl3 = await prisma.cylinder.create({
-    data: { assetCode: 'PTT-4-001', qrCode: 'QR-4-001', status: 'READY_TO_DISPATCH', productId: product4kg.id }
+    data: { cylinderNo: 'PTT-4-001', cylinderCode: 'CODE-003', qrCode: 'QR-4-001', status: 'READY_TO_DISPATCH', productId: product4kg.id }
   });
 
   console.log('Seeding Refill Batches...');
@@ -91,20 +91,18 @@ async function main() {
   });
   
   const cyl4 = await prisma.cylinder.create({
-    data: { assetCode: 'PTT-15-003', qrCode: 'QR-15-003', status: 'IN_REFILL', refillBatchId: batch1.id, productId: product15kg.id }
+    data: { cylinderNo: 'PTT-15-003', cylinderCode: 'CODE-004', qrCode: 'QR-15-003', status: 'IN_REFILL', refillBatchId: batch1.id, productId: product15kg.id }
   });
 
   console.log('Seeding Orders & Delivery Jobs...');
   const order1 = await prisma.order.create({
     data: {
-      orderNo: 'ORD-2606-001',
+      orderNo: 'DSP-2606-001',
       customerId: customer1.id,
       status: 'PROCESSING',
-      totalAmount: 450,
-      paymentStatus: 'UNPAID',
       items: {
         create: [
-          { productId: product15kg.id, quantity: 1, unitPrice: 420, totalPrice: 450 }
+          { productId: product15kg.id, quantity: 1 }
         ]
       },
       deliveryJob: {
@@ -125,14 +123,12 @@ async function main() {
 
   const order2 = await prisma.order.create({
     data: {
-      orderNo: 'ORD-2606-002',
+      orderNo: 'DSP-2606-002',
       customerId: customer2.id,
       status: 'COMPLETED',
-      totalAmount: 200,
-      paymentStatus: 'PAID',
       items: {
         create: [
-          { productId: product4kg.id, quantity: 1, unitPrice: 180, totalPrice: 200 }
+          { productId: product4kg.id, quantity: 1 }
         ]
       },
       deliveryJob: {

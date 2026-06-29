@@ -1,10 +1,9 @@
-import { PrismaClient } from "@prisma/client";
 import Link from "next/link";
 import { ArrowLeft, MapPin, Phone, Package, Navigation } from "lucide-react";
 import { notFound } from "next/navigation";
 import DriverActionButtons from "./DriverActionButtons";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function JobDetailPage({ params }: { params: Promise<{ jobId: string }> }) {
   const { jobId } = await params;
@@ -14,9 +13,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
       order: {
         include: {
           customer: true,
-          items: {
-            include: { product: true }
-          }
+          cylinders: true
         }
       }
     }
@@ -82,9 +79,10 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
               <Package className="h-4 w-4" /> รายการสินค้า
             </p>
             <div className="space-y-4">
-              {job.order.items.map((item: any) => (
-                <div key={item.id} className="flex justify-between items-center p-4 bg-gray-900/50 rounded-2xl border border-gray-700/30">
-                  <span className="text-gray-200 font-medium">{item.product.name} <span className="text-gray-500 ml-1">x{item.quantity}</span></span>
+              {job.order.cylinders.map((cyl: any) => (
+                <div key={cyl.id} className="flex flex-col p-4 bg-gray-900/50 rounded-2xl border border-gray-700/30 gap-1">
+                  <span className="text-gray-200 font-medium">รหัสถัง: {cyl.cylinderNo}</span>
+                  <span className="text-gray-500 text-sm">QR Code: {cyl.qrCode}</span>
                 </div>
               ))}
             </div>

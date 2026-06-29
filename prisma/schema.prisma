@@ -1,31 +1,29 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      String   @default("OWNER")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  password     String
+  role         String        @default("OWNER")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   deliveryJobs DeliveryJob[]
 }
 
 model Customer {
-  id           String   @id @default(cuid())
-  customerCode String?  @unique
+  id           String     @id @default(cuid())
+  customerCode String?    @unique
   name         String
-  taxType      String   @default("UNSPECIFIED") // UNSPECIFIED, INDIVIDUAL, CORPORATE
+  taxType      String     @default("UNSPECIFIED")
   taxId        String?
   branchName   String?
   branchNo     String?
@@ -35,105 +33,72 @@ model Customer {
   address      String?
   lat          Float?
   lng          Float?
-  type         String   @default("GENERAL") // GENERAL, B2B
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  type         String     @default("GENERAL")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  cylinders    Cylinder[]
   orders       Order[]
-  cylinders    Cylinder[]
-}
-
-model GasProduct {
-  id           String   @id @default(cuid())
-  name         String
-  sizeKg       Float
-  salePrice    Float
-  deliveryFee  Float
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  orderItems   OrderItem[]
-  cylinders    Cylinder[]
 }
 
 model Cylinder {
-  id                String       @id @default(cuid())
-  assetCode         String       @unique
-  qrCode            String       @unique
-  status            String       // READY_TO_DISPATCH, WITH_CUSTOMER, etc.
-  
-  productId         String?
-  product           GasProduct?  @relation(fields: [productId], references: [id])
-  
+  id                String        @id @default(cuid())
+  cylinderNo        String        @unique
+  qrCode            String        @unique
+  cylinderCode      String?
+  status            String
   currentCustomerId String?
-  currentCustomer   Customer?    @relation(fields: [currentCustomerId], references: [id])
-  
   orderId           String?
-  order             Order?       @relation(fields: [orderId], references: [id])
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  logs              CylinderLog[]
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
   refillBatchId     String?
-  refillBatch       RefillBatch? @relation(fields: [refillBatchId], references: [id])
+  refillBatch       RefillBatch?  @relation(fields: [refillBatchId], references: [id])
+  order             Order?        @relation(fields: [orderId], references: [id])
+  currentCustomer   Customer?     @relation(fields: [currentCustomerId], references: [id])
+  logs              CylinderLog[]
 }
 
 model RefillBatch {
-  id          String   @id @default(cuid())
-  batchNo     String   @unique
-  status      String   @default("SENT") // SENT, RECEIVED
-  sentAt      DateTime @default(now())
-  receivedAt  DateTime?
-  totalCost   Float    @default(0)
-  cylinders   Cylinder[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String     @id @default(cuid())
+  batchNo    String     @unique
+  status     String     @default("SENT")
+  sentAt     DateTime   @default(now())
+  receivedAt DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  cylinders  Cylinder[]
 }
 
 model CylinderLog {
-  id          String   @id @default(cuid())
-  cylinderId  String
-  cylinder    Cylinder @relation(fields: [cylinderId], references: [id], onDelete: Cascade)
-  status      String
-  notes       String?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  cylinderId String
+  status     String
+  notes      String?
+  createdAt  DateTime @default(now())
+  cylinder   Cylinder @relation(fields: [cylinderId], references: [id], onDelete: Cascade)
 }
 
 model Order {
-  id            String   @id @default(cuid())
-  orderNo       String   @unique
-  customerId    String
-  customer      Customer @relation(fields: [customerId], references: [id])
-  status        String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, CANCELLED
-  totalAmount   Float
-  paymentStatus String   @default("UNPAID") // UNPAID, PAID
-  items         OrderItem[]
-  cylinders     Cylinder[]
-  deliveryJob   DeliveryJob?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
-model OrderItem {
-  id          String     @id @default(cuid())
-  orderId     String
-  order       Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId   String
-  product     GasProduct @relation(fields: [productId], references: [id])
-  quantity    Int
-  unitPrice   Float
-  totalPrice  Float
+  id          String       @id @default(cuid())
+  orderNo     String       @unique
+  customerId  String
+  status      String       @default("PENDING")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  cylinders   Cylinder[]
+  deliveryJob DeliveryJob?
+  customer    Customer     @relation(fields: [customerId], references: [id])
 }
 
 model DeliveryJob {
-  id          String   @id @default(cuid())
-  jobNo       String   @unique
-  orderId     String   @unique
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id          String    @id @default(cuid())
+  jobNo       String    @unique
+  orderId     String    @unique
   driverId    String?
-  driver      User?    @relation(fields: [driverId], references: [id])
-  status      String   @default("WAITING") // WAITING, ASSIGNED, OUT_FOR_DELIVERY, DELIVERED
+  status      String    @default("WAITING")
   address     String?
   deliveredAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  driver      User?     @relation(fields: [driverId], references: [id])
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }

@@ -1,7 +1,6 @@
 import { PackageOpen, CheckCircle2, Clock, AlertTriangle, Database, RefreshCw, Truck, DollarSign } from "lucide-react";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function DashboardPage() {
   const now = new Date();
@@ -41,17 +40,15 @@ export default async function DashboardPage() {
   const withCustomerCount = getCylCount("WITH_CUSTOMER");
 
   // 4. Monthly Cylinders Sold
-  const monthlyItems = await prisma.orderItem.findMany({
+  const monthlyOrders = await prisma.order.findMany({
     where: {
-      order: {
-        createdAt: { gte: startOfMonth },
-        status: { not: "CANCELLED" }
-      }
+      createdAt: { gte: startOfMonth },
+      status: { not: "CANCELLED" }
     },
-    select: { quantity: true }
+    include: { cylinders: true }
   });
   
-  const monthlyCylindersSold = monthlyItems.reduce((sum, item) => sum + item.quantity, 0);
+  const monthlyCylindersSold = monthlyOrders.reduce((sum, order) => sum + order.cylinders.length, 0);
 
   return (
     <div className="space-y-6">

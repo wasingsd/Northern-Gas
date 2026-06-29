@@ -1,29 +1,30 @@
 "use client";
 
-import { useState } from "react";
-import { deleteProductAction } from "./actions";
+import { Trash2 } from "lucide-react";
+import { useTransition } from "react";
+import { deleteCylinderAction } from "../cylinders/actions"; // We'll keep the action in cylinders for now, or move it later.
 
 export default function DeleteProductButton({ id }: { id: string }) {
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const handleDelete = async () => {
-    if (!confirm("คุณแน่ใจหรือไม่ที่จะลบสินค้านี้?")) return;
-    setLoading(true);
-    try {
-      await deleteProductAction(id);
-    } catch (e) {
-      alert("ไม่สามารถลบสินค้านี้ได้ (อาจมีข้อมูลออเดอร์ผูกอยู่)");
-      setLoading(false);
+  const handleDelete = () => {
+    if (confirm("คุณแน่ใจหรือไม่ว่าต้องการลบถังนี้? ข้อมูลประวัติทั้งหมดจะถูกลบด้วย")) {
+      startTransition(async () => {
+        await deleteCylinderAction(id);
+      });
     }
   };
 
   return (
-    <button 
+    <button
       onClick={handleDelete}
-      disabled={loading}
-      className="text-red-500 hover:underline text-sm font-medium ml-4 disabled:opacity-50"
+      disabled={isPending}
+      className={`p-2 rounded-lg transition-colors ${
+        isPending ? "text-gray-400" : "text-red-600 hover:bg-red-50"
+      }`}
+      title="ลบถังแก๊ส"
     >
-      ลบ
+      <Trash2 className="h-4 w-4" />
     </button>
   );
 }
