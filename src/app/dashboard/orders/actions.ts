@@ -181,3 +181,19 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
   revalidatePath(`/dashboard/orders/${order.id}`);
   redirect(`/dashboard/orders/${order.id}`);
 }
+
+export async function markOrderAsReadyAction(orderId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId }
+  });
+
+  if (!order) throw new Error("Order not found");
+
+  await prisma.order.update({
+    where: { id: orderId },
+    data: { status: "READY_FOR_DISPATCH" }
+  });
+
+  revalidatePath("/dashboard/orders");
+  revalidatePath("/dashboard/dispatch");
+}

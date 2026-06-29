@@ -5,6 +5,13 @@ import prisma from "@/lib/prisma";
 
 export default async function DispatchPage() {
   const jobs = await prisma.deliveryJob.findMany({
+    where: {
+      order: {
+        status: {
+          not: "PENDING"
+        }
+      }
+    },
     include: {
       order: {
         include: { customer: true, cylinders: true }

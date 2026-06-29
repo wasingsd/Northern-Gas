@@ -1,5 +1,6 @@
 import { Plus, Search, CheckCircle2, Clock } from "lucide-react";
 import Link from "next/link";
+import { markOrderAsReadyAction } from "./actions";
 
 import prisma from "@/lib/prisma";
 
@@ -50,12 +51,13 @@ export default async function OrdersPage() {
                 <th className="px-6 py-4 font-medium">สินค้า</th>
                 <th className="px-6 py-4 font-medium text-center">สถานะออเดอร์</th>
                 <th className="px-6 py-4 font-medium text-center">งานจัดส่ง</th>
+                <th className="px-6 py-4 font-medium text-center">จัดการ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                     ยังไม่มีรายการคำสั่งซื้อ
                   </td>
                 </tr>
@@ -76,10 +78,24 @@ export default async function OrdersPage() {
                     </td>
 
                     <td className="px-6 py-4 text-center">
-                      <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium bg-yellow-50 text-yellow-700">
-                        <Clock className="h-3 w-3" />
-                        รอดำเนินการ
-                      </span>
+                      {o.status === "PENDING" && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium bg-yellow-50 text-yellow-700">
+                          <Clock className="h-3 w-3" />
+                          รอดำเนินการ
+                        </span>
+                      )}
+                      {o.status === "READY_FOR_DISPATCH" && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium bg-blue-50 text-blue-700">
+                          <CheckCircle2 className="h-3 w-3" />
+                          พร้อมส่ง
+                        </span>
+                      )}
+                      {o.status === "COMPLETED" && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium bg-green-50 text-green-700">
+                          <CheckCircle2 className="h-3 w-3" />
+                          ส่งสำเร็จ
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-center">
                       {o.deliveryJob ? (
@@ -88,6 +104,25 @@ export default async function OrdersPage() {
                          </span>
                       ) : (
                         "-"
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-center space-y-2">
+                      {o.status === "PENDING" && (
+                        <form action={markOrderAsReadyAction.bind(null, o.id)}>
+                          <button type="submit" className="w-full rounded bg-blue-600 text-white text-xs py-1.5 font-medium hover:bg-blue-700 transition-colors">
+                            พร้อมส่ง
+                          </button>
+                        </form>
+                      )}
+                      {o.status !== "PENDING" && (
+                        <a 
+                          href={`/print/orders/${o.id}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="w-full inline-block rounded bg-gray-800 text-white text-xs py-1.5 font-medium hover:bg-gray-900 transition-colors"
+                        >
+                          🖨️ ใบส่งถัง
+                        </a>
                       )}
                     </td>
                   </tr>
