@@ -3,6 +3,7 @@ import Link from "next/link";
 import { updateOrderAction } from "../../actions";
 import OrderItemsForm from "../../new/OrderItemsForm";
 import CustomerSection from "../../new/CustomerSection";
+import OrderFormClient from "../../new/OrderFormClient";
 import { notFound } from "next/navigation";
 
 import prisma from "@/lib/prisma";
@@ -58,7 +59,7 @@ export default async function EditOrderPage({ params }: { params: Promise<{ orde
       </div>
 
       <div className="rounded-xl border border-border bg-white shadow-sm overflow-hidden">
-        <form action={updateActionWithId} className="p-6 space-y-6">
+        <OrderFormClient action={updateActionWithId}>
           <CustomerSection customers={customers} initialData={order.customer} />
           
           <OrderItemsForm cylinders={allCylinders} initialItems={orderCylinders} />
@@ -77,7 +78,7 @@ export default async function EditOrderPage({ params }: { params: Promise<{ orde
               บันทึกการแก้ไข
             </button>
           </div>
-        </form>
+        </OrderFormClient>
       </div>
     </div>
   );

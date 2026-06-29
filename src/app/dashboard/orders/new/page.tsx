@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createOrderAction } from "../actions";
 import OrderItemsForm from "./OrderItemsForm";
 import CustomerSection from "./CustomerSection";
+import OrderFormClient from "./OrderFormClient";
 
 import prisma from "@/lib/prisma";
 
@@ -23,7 +24,7 @@ export default async function NewOrderPage() {
       </div>
 
       <div className="rounded-xl border border-border bg-white shadow-sm overflow-hidden">
-        <form action={createOrderAction} className="p-6 space-y-6">
+        <OrderFormClient action={createOrderAction}>
           <CustomerSection customers={customers} />
           
           <OrderItemsForm cylinders={cylinders} />
@@ -42,7 +43,7 @@ export default async function NewOrderPage() {
               บันทึกรายการส่งถัง
             </button>
           </div>
-        </form>
+        </OrderFormClient>
       </div>
     </div>
   );
