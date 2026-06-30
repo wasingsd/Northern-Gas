@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import { useTransition } from "react";
 import { deleteCylinderAction } from "./actions";
 
@@ -19,12 +19,12 @@ export default function DeleteProductButton({ id }: { id: string }) {
     <button
       onClick={handleDelete}
       disabled={isPending}
-      className={`p-2 rounded-lg transition-colors ${
-        isPending ? "text-gray-400" : "text-red-600 hover:bg-red-50"
+      className={`p-2 rounded-lg transition-colors flex items-center justify-center ${
+        isPending ? "text-gray-400 bg-gray-50" : "text-red-600 hover:bg-red-50"
       }`}
       title="ลบถังแก๊ส"
     >
-      <Trash2 className="h-4 w-4" />
+      {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
     </button>
   );
 }

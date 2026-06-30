@@ -11,7 +11,8 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     where: { id },
   });
 
-
+  const products = await prisma.gasProduct.findMany({ orderBy: { name: "asc" } });
+  const owners = await prisma.cylinderOwner.findMany({ orderBy: { name: "asc" } });
 
   if (!cylinder) return notFound();
 
@@ -63,7 +64,42 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
               />
             </div>
 
+            <div className="space-y-2">
+              <label htmlFor="productId" className="text-sm font-medium text-foreground">
+                ประเภทถังแก๊ส (Gas Product) <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="productId"
+                name="productId"
+                required
+                defaultValue={cylinder.productId || ""}
+                className="w-full rounded-lg border border-border px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors bg-white text-foreground"
+              >
+                <option value="">-- เลือกประเภทถังแก๊ส --</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({p.size})
+                  </option>
+                ))}
+              </select>
+            </div>
 
+            <div className="space-y-2">
+              <label htmlFor="ownerId" className="text-sm font-medium text-foreground">
+                เจ้าของถัง <span className="text-gray-400 font-normal">(ไม่บังคับ)</span>
+              </label>
+              <select
+                id="ownerId"
+                name="ownerId"
+                defaultValue={cylinder.ownerId || ""}
+                className="w-full rounded-lg border border-border px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors bg-white text-foreground"
+              >
+                <option value="">-- ไม่ระบุ (เป็นถังของร้าน/หมุนเวียน) --</option>
+                {owners.map((owner) => (
+                  <option key={owner.id} value={owner.id}>{owner.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
           
           <div className="pt-4 border-t border-border flex justify-end gap-3">

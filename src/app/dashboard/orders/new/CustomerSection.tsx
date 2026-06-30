@@ -49,8 +49,8 @@ export default function CustomerSection({ customers, initialData }: { customers:
       
       {/* Search / Name Field with Dropdown */}
       <div className="relative" ref={wrapperRef}>
-        <div className="flex items-center gap-6">
-          <div className="w-48 text-gray-700 font-medium">ค้นหา / ชื่อ หรือ รหัสลูกค้า <span className="text-red-500">*</span></div>
+        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+          <div className="text-gray-700 font-medium md:w-48">ค้นหา / ชื่อ หรือ รหัสลูกค้า <span className="text-red-500">*</span></div>
           <div className="flex-1 relative">
             <input 
               type="text" 
@@ -61,7 +61,7 @@ export default function CustomerSection({ customers, initialData }: { customers:
               required
               autoComplete="off"
               placeholder="พิมพ์ชื่อ หรือ รหัสลูกค้า เพื่อค้นหาหรือสร้างใหม่" 
-              className="w-full rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+              className="w-full rounded-lg border border-border px-4 py-3 text-base md:text-sm md:py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
             />
             
             {showDropdown && query.length > 0 && filteredCustomers.length > 0 && (

@@ -40,6 +40,7 @@ model Cylinder {
   currentCustomerId  String?
   orderId            String?
   productId          String?
+  ownerId            String?
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   refillBatchId      String?
@@ -47,6 +48,7 @@ model Cylinder {
   order              Order?              @relation(fields: [orderId], references: [id])
   currentCustomer    Customer?           @relation(fields: [currentCustomerId], references: [id])
   product            GasProduct?         @relation(fields: [productId], references: [id])
+  owner              CylinderOwner?      @relation(fields: [ownerId], references: [id])
   logs               CylinderLog[]
   returnReceiptItems ReturnReceiptItem[]
 }
@@ -99,13 +101,21 @@ model DeliveryJob {
 }
 
 model GasProduct {
-  id         String      @id @default(cuid())
+  id         String         @id @default(cuid())
   name       String
-  size       String      @default("")
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  size       String         @default("")
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
   cylinders  Cylinder[]
   orderItems OrderItem[]
+}
+
+model CylinderOwner {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  cylinders Cylinder[]
 }
 
 model OrderItem {

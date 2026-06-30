@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import { deleteGasProductAction } from "./actions";
 
 export default function DeleteGasProductButton({ id }: { id: string }) {
@@ -23,10 +23,13 @@ export default function DeleteGasProductButton({ id }: { id: string }) {
     <button
       onClick={handleDelete}
       disabled={isPending}
-      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50"
+      className={`p-2 rounded-lg transition-colors flex items-center justify-center gap-1 min-w-[70px] ${
+        isPending ? "text-gray-400 bg-gray-50" : "text-red-600 hover:bg-red-50"
+      }`}
       title="ลบ"
     >
-      <Trash2 className="h-4 w-4" /> ลบ
+      {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+      {isPending ? "กำลังลบ..." : "ลบ"}
     </button>
   );
 }

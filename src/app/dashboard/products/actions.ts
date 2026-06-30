@@ -9,6 +9,7 @@ export async function createCylinderAction(formData: FormData) {
   const cylinderNo = formData.get("cylinderNo") as string;
   const qrCode = formData.get("qrCode") as string;
   const productId = formData.get("productId") as string;
+  const ownerId = (formData.get("ownerId") as string) || null;
   const redirectTo = formData.get("redirectTo") as string || "/dashboard/products";
   
   const parsed = CylinderSchema.safeParse({ cylinderNo, qrCode, productId });
@@ -21,6 +22,7 @@ export async function createCylinderAction(formData: FormData) {
       cylinderNo,
       qrCode,
       productId,
+      ownerId,
       status: "READY_TO_DISPATCH", // default status
     }
   });
@@ -41,6 +43,7 @@ export async function updateCylinderAction(id: string, formData: FormData) {
   const cylinderNo = formData.get("cylinderNo") as string;
   const qrCode = formData.get("qrCode") as string;
   const productId = formData.get("productId") as string;
+  const ownerId = (formData.get("ownerId") as string) || null;
   const redirectTo = formData.get("redirectTo") as string || `/dashboard/products/${id}`;
   
   const parsed = CylinderSchema.safeParse({ cylinderNo, qrCode, productId });
@@ -54,6 +57,7 @@ export async function updateCylinderAction(id: string, formData: FormData) {
       cylinderNo,
       qrCode,
       productId,
+      ownerId,
     }
   });
 

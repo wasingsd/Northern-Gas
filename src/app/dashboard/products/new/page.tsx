@@ -1,11 +1,16 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { createCylinderAction } from "../actions";
+import SubmitButton from "@/components/SubmitButton";
 
 import prisma from "@/lib/prisma";
 
 export default async function NewProductPage() {
   const products = await prisma.gasProduct.findMany({
+    orderBy: { name: "asc" }
+  });
+  
+  const owners = await prisma.cylinderOwner.findMany({
     orderBy: { name: "asc" }
   });
 
@@ -31,7 +36,7 @@ export default async function NewProductPage() {
               <select
                 name="productId"
                 required
-                className="w-full rounded-lg border border-border px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors bg-white"
+                className="w-full rounded-lg border border-border px-4 py-3 text-base md:text-sm md:py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors bg-white"
               >
                 <option value="">-- เลือกประเภทถังแก๊ส --</option>
                 {products.map((p) => (
@@ -48,7 +53,7 @@ export default async function NewProductPage() {
                 type="text"
                 name="cylinderNo"
                 required
-                className="w-full rounded-lg border border-border px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                className="w-full rounded-lg border border-border px-4 py-3 text-base md:text-sm md:py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 placeholder="เช่น 70-123213"
               />
             </div>
@@ -60,9 +65,22 @@ export default async function NewProductPage() {
                 type="text"
                 name="qrCode"
                 required
-                className="w-full rounded-lg border border-border px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                className="w-full rounded-lg border border-border px-4 py-3 text-base md:text-sm md:py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 placeholder="เอาเครื่องสแกนยิงช่องนี้"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">เจ้าของถัง <span className="text-gray-400 font-normal">(ไม่บังคับ)</span></label>
+              <select
+                name="ownerId"
+                className="w-full rounded-lg border border-border px-4 py-3 text-base md:text-sm md:py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors bg-white"
+              >
+                <option value="">-- ไม่ระบุ (เป็นถังของร้าน/หมุนเวียน) --</option>
+                {owners.map(owner => (
+                  <option key={owner.id} value={owner.id}>{owner.name}</option>
+                ))}
+              </select>
             </div>
 
 
@@ -75,12 +93,11 @@ export default async function NewProductPage() {
             >
               ยกเลิก
             </Link>
-            <button
+            <SubmitButton
               type="submit"
+              defaultText="เพิ่มสินค้า"
               className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors"
-            >
-              เพิ่มสินค้า
-            </button>
+            />
           </div>
         </form>
       </div>

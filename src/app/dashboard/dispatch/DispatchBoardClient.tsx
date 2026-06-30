@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Phone, Truck, Package, Printer } from "lucide-react";
+import { MapPin, Phone, Truck, Package, Printer, Loader2 } from "lucide-react";
 import { updateDispatchStatus } from "./actions";
 import { useTransition } from "react";
 
@@ -25,7 +25,7 @@ export default function DispatchBoardClient({ initialJobs }: { initialJobs: any[
         const columnJobs = initialJobs.filter(j => j.status === col.id);
         
         return (
-          <div key={col.id} className={`rounded-xl p-4 min-h-[500px] ${col.bg}`}>
+          <div key={col.id} className={`rounded-xl p-4 min-h-[200px] md:min-h-[500px] ${col.bg}`}>
             <h3 className="font-bold text-foreground mb-4 flex items-center justify-between">
               {col.title}
               <span className="text-xs bg-white text-gray-700 px-2 py-1 rounded-full">{columnJobs.length}</span>
@@ -78,18 +78,20 @@ export default function DispatchBoardClient({ initialJobs }: { initialJobs: any[
                        <button 
                          onClick={() => handleStatusChange(job.id, "OUT_FOR_DELIVERY")}
                          disabled={isPending}
-                         className="w-full bg-blue-600 text-white text-xs font-medium py-1.5 rounded hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-1"
+                         className="w-full bg-blue-600 text-white text-sm font-medium py-2.5 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-1 transition-colors"
                        >
-                         <Truck className="h-3 w-3" /> ยืนยันออกรถ
+                         {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}
+                         {isPending ? "กำลังบันทึก..." : "ยืนยันออกรถ"}
                        </button>
                     )}
                     {col.id === "OUT_FOR_DELIVERY" && (
                        <button 
                          onClick={() => handleStatusChange(job.id, "DELIVERED")}
                          disabled={isPending}
-                         className="w-full bg-green-600 text-white text-xs font-medium py-1.5 rounded hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-1"
+                         className="w-full bg-green-600 text-white text-sm font-medium py-2.5 rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-1 transition-colors"
                        >
-                         <Package className="h-3 w-3" /> บันทึกส่งสำเร็จ
+                         {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />}
+                         {isPending ? "กำลังบันทึก..." : "บันทึกส่งสำเร็จ"}
                        </button>
                     )}
                     {col.id === "DELIVERED" && (

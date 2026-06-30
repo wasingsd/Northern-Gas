@@ -67,9 +67,9 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
         width: "100%",
         maxWidth: "58mm",
         margin: "0 auto",
-        padding: "4px"
+        padding: "0px"
       }}>
-        <div style={{ textAlign: "center", fontSize: "16px", fontWeight: "bold", marginBottom: "2px" }}>
+        <div style={{ textAlign: "center", fontSize: "12px", fontWeight: "bold", marginBottom: "2px", whiteSpace: "nowrap", transform: "scale(0.95)", transformOrigin: "center" }}>
           {profile.nameEN}
         </div>
         <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "4px", whiteSpace: "nowrap", transform: "scale(0.9)", transformOrigin: "center" }}>

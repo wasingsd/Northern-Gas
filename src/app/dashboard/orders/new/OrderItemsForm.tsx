@@ -97,11 +97,11 @@ export default function OrderItemsForm({ cylinders, initialItems }: { cylinders:
           </button>
         </h3>
 
-        <div className="bg-gray-50 border border-border rounded-xl p-6 mb-4">
+        <div className="bg-gray-50 border border-border rounded-xl p-4 md:p-6 mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             สแกนบาร์โค้ดถังแก๊ส (QR Code หรือ Asset Code)
           </label>
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="relative flex-1">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <ScanLine className="h-5 w-5 text-gray-400" />
@@ -112,15 +112,14 @@ export default function OrderItemsForm({ cylinders, initialItems }: { cylinders:
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleScan}
-                inputMode="none" /* Hide virtual keyboard */
                 placeholder="สแกน หรือ พิมพ์รหัสแล้วกด Enter"
-                className="pl-10 w-full rounded-lg border border-border px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-lg"
+                className="pl-10 w-full rounded-lg border border-border px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-base"
               />
             </div>
             <button 
               type="button"
               onClick={() => handleScan({ key: 'Enter', preventDefault: () => {} } as any)}
-              className="bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-medium"
+              className="w-full sm:w-auto bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-medium text-base sm:text-sm"
             >
               เพิ่ม
             </button>

@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { createGasProductAction } from "../actions";
+import SubmitButton from "@/components/SubmitButton";
 
 export default function NewGasProductPage() {
   return (
@@ -31,7 +32,7 @@ export default function NewGasProductPage() {
                 name="name"
                 required
                 placeholder="เช่น ถัง ปตท. 15 กก."
-                className="w-full rounded-lg border border-border px-4 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                className="w-full rounded-lg border border-border px-4 py-3 text-base md:text-sm md:py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
               />
             </div>
 
@@ -45,7 +46,7 @@ export default function NewGasProductPage() {
                 name="size"
                 required
                 placeholder="เช่น 15 หรือ 7M3"
-                className="w-full rounded-lg border border-border px-4 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                className="w-full rounded-lg border border-border px-4 py-3 text-base md:text-sm md:py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
               />
             </div>
           </div>
@@ -57,12 +58,11 @@ export default function NewGasProductPage() {
             >
               ยกเลิก
             </Link>
-            <button
+            <SubmitButton
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-lg transition-colors"
-            >
-              บันทึกข้อมูล
-            </button>
+              defaultText="บันทึกข้อมูล"
+              className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors"
+            />
           </div>
         </form>
       </div>
