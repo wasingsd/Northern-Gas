@@ -1,4 +1,4 @@
-import { updateCylinderAction } from "../../../cylinders/actions";
+import { updateCylinderAction } from "../../actions";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";

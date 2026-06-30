@@ -30,7 +30,8 @@ export default async function PrintOrderPage(props: { params: Promise<{ orderId:
   const profile = await prisma.companyProfile.findFirst() || {
     nameEN: "NORTHERN INDUSTRIAL GAS CO.,LTD",
     nameTH: "บริษัท นอร์ทเธิร์น อินดัสเตรียลแก๊ส จำกัด",
-    tel1: "053-091234-5"
+    tel1: "053-091234-5",
+    tel2: null
   };
 
   return (

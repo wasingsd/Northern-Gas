@@ -26,7 +26,8 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
   const profile = await prisma.companyProfile.findFirst() || {
     nameEN: "NORTHERN INDUSTRIAL GAS CO.,LTD",
     nameTH: "บริษัท นอร์ทเธิร์น อินดัสเตรียลแก๊ส จำกัด",
-    tel1: "053-091234-5"
+    tel1: "053-091234-5",
+    tel2: null
   };
 
   const dateStr = new Date(receipt.createdAt).toLocaleString("th-TH", {
