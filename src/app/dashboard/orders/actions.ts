@@ -26,7 +26,7 @@ export async function createOrderAction(formData: FormData) {
   
   const parsed = CreateOrderSchema.safeParse({ customerName, cylinderIds });
   if (!parsed.success) {
-    throw new Error(parsed.error.errors[0].message);
+    throw new Error(parsed.error.issues[0].message);
   }
 
   // Find or create customer
@@ -156,7 +156,7 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
   
   const parsed = CreateOrderSchema.safeParse({ customerName, cylinderIds });
   if (!parsed.success) {
-    throw new Error(parsed.error.errors[0].message);
+    throw new Error(parsed.error.issues[0].message);
   }
 
   const order = await prisma.order.findUnique({

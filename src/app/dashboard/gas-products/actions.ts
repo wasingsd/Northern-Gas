@@ -12,7 +12,7 @@ export async function createGasProductAction(formData: FormData) {
 
   const parsed = GasProductSchema.safeParse({ name, sizeKg });
   if (!parsed.success) {
-    throw new Error(parsed.error.errors[0].message);
+    throw new Error(parsed.error.issues[0].message);
   }
 
   await prisma.gasProduct.create({
@@ -33,7 +33,7 @@ export async function updateGasProductAction(id: string, formData: FormData) {
 
   const parsed = GasProductSchema.safeParse({ name, sizeKg });
   if (!parsed.success) {
-    throw new Error(parsed.error.errors[0].message);
+    throw new Error(parsed.error.issues[0].message);
   }
 
   await prisma.gasProduct.update({

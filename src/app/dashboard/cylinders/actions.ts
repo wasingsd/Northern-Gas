@@ -14,7 +14,7 @@ export async function createCylinderAction(formData: FormData) {
   
   const parsed = CylinderSchema.safeParse({ cylinderNo, qrCode, cylinderCode, productId });
   if (!parsed.success) {
-    throw new Error(parsed.error.errors[0].message);
+    throw new Error(parsed.error.issues[0].message);
   }
 
   const cylinder = await prisma.cylinder.create({
@@ -48,7 +48,7 @@ export async function updateCylinderAction(id: string, formData: FormData) {
   
   const parsed = CylinderSchema.safeParse({ cylinderNo, qrCode, cylinderCode, productId });
   if (!parsed.success) {
-    throw new Error(parsed.error.errors[0].message);
+    throw new Error(parsed.error.issues[0].message);
   }
 
   await prisma.cylinder.update({

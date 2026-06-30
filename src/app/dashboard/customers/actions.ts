@@ -19,7 +19,7 @@ export async function createCustomerAction(formData: FormData) {
 
   const parsed = CustomerSchema.safeParse({ customerCode, name, phone, address });
   if (!parsed.success) {
-    throw new Error(parsed.error.errors[0].message);
+    throw new Error(parsed.error.issues[0].message);
   }
 
   await prisma.customer.create({
@@ -52,7 +52,7 @@ export async function updateCustomerAction(id: string, formData: FormData) {
 
   const parsed = CustomerSchema.safeParse({ customerCode, name, phone, address });
   if (!parsed.success) {
-    throw new Error(parsed.error.errors[0].message);
+    throw new Error(parsed.error.issues[0].message);
   }
 
   await prisma.customer.update({

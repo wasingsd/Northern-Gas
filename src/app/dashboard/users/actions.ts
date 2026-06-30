@@ -31,7 +31,7 @@ export async function createUserAction(formData: FormData) {
 
   const parsed = UserSchema.safeParse({ name, email, password, role });
   if (!parsed.success) {
-    throw new Error(parsed.error.errors[0].message);
+    throw new Error(parsed.error.issues[0].message);
   }
 
   const adminClient = getAdminClient();
@@ -71,7 +71,7 @@ export async function updateUserAction(id: string, formData: FormData) {
 
   const parsed = UserSchema.safeParse({ name, email, password, role });
   if (!parsed.success) {
-    throw new Error(parsed.error.errors[0].message);
+    throw new Error(parsed.error.issues[0].message);
   }
 
   // Get current Prisma user to find supabaseId
