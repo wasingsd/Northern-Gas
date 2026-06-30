@@ -38,21 +38,28 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
   return (
     <>
       <PrintTrigger />
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page { margin: 0; }
+          body { margin: 0; }
+        }
+      `}} />
       <div style={{
         fontFamily: "'Sarabun', sans-serif",
-        fontSize: "12px",
+        fontSize: "14px",
         color: "#000",
-        width: "57mm",
+        width: "100%",
+        maxWidth: "58mm",
         margin: "0 auto",
-        padding: "0"
+        padding: "4px"
       }}>
-        <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "2px" }}>
+        <div style={{ textAlign: "center", fontSize: "16px", fontWeight: "bold", marginBottom: "2px" }}>
           {profile.nameEN}
         </div>
-        <div style={{ textAlign: "center", fontSize: "12px", fontWeight: "bold", marginBottom: "4px" }}>
+        <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "4px" }}>
           {profile.nameTH}
         </div>
-        {profile.tel1 && <div style={{ textAlign: "center", fontSize: "10px", marginBottom: "4px" }}>โทร: {profile.tel1} {profile.tel2 ? `, ${profile.tel2}` : ''}</div>}
+        {profile.tel1 && <div style={{ textAlign: "center", fontSize: "12px", marginBottom: "4px" }}>โทร: {profile.tel1} {profile.tel2 ? `, ${profile.tel2}` : ''}</div>}
         
         <div style={{ textAlign: "center", fontWeight: "bold", marginTop: "8px" }}>CR - Cylinder Return</div>
         <div style={{ textAlign: "center" }}>ใบรับท่อแก๊สคืน (ชั่วคราว)</div>
@@ -72,7 +79,7 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
         
         <div style={{ marginTop: "8px", padding: "0 4px" }}>
           {receipt.items.map((item, idx) => (
-             <div key={item.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "4px" }}>
+             <div key={item.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "14px", marginBottom: "4px" }}>
                <div>{idx + 1}. {item.cylinder.cylinderNo}</div>
                <div>1 ใบ</div>
              </div>

@@ -37,21 +37,28 @@ export default async function PrintOrderPage(props: { params: Promise<{ orderId:
   return (
     <>
       <PrintTrigger />
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page { margin: 0; }
+          body { margin: 0; }
+        }
+      `}} />
       <div style={{
         fontFamily: "'Sarabun', sans-serif",
-        fontSize: "12px",
+        fontSize: "14px",
         color: "#000",
-        width: "57mm",
+        width: "100%",
+        maxWidth: "58mm",
         margin: "0 auto",
-        padding: "0"
+        padding: "4px"
       }}>
-        <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "2px" }}>
+        <div style={{ textAlign: "center", fontSize: "16px", fontWeight: "bold", marginBottom: "2px" }}>
           {profile.nameEN}
         </div>
-        <div style={{ textAlign: "center", fontSize: "12px", fontWeight: "bold", marginBottom: "4px" }}>
+        <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "4px" }}>
           {profile.nameTH}
         </div>
-        {profile.tel1 && <div style={{ textAlign: "center", fontSize: "10px", marginBottom: "4px" }}>โทร: {profile.tel1} {profile.tel2 ? `, ${profile.tel2}` : ''}</div>}
+        {profile.tel1 && <div style={{ textAlign: "center", fontSize: "12px", marginBottom: "4px" }}>โทร: {profile.tel1} {profile.tel2 ? `, ${profile.tel2}` : ''}</div>}
         
         <div style={{ textAlign: "center", fontWeight: "bold", marginTop: "8px" }}>CD - Cylinder Delivery</div>
         <div style={{ textAlign: "center" }}>ใบส่งท่อแก๊ส</div>
@@ -79,7 +86,7 @@ export default async function PrintOrderPage(props: { params: Promise<{ orderId:
         
         <div style={{ marginTop: "8px", padding: "0 4px" }}>
           {order.cylinders.map((c: any, i: number) => (
-            <div key={c.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "4px" }}>
+            <div key={c.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", marginBottom: "4px" }}>
               <div>{i + 1}. {c.cylinderNo}</div>
               <div>1 ใบ</div>
             </div>
