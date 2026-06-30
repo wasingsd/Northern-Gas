@@ -10,19 +10,16 @@ export const UserSchema = z.object({
 export const CustomerSchema = z.object({
   customerCode: z.string().optional(),
   name: z.string().min(1, "กรุณากรอกชื่อลูกค้า"),
-  phone: z.string().optional(),
-  address: z.string().optional(),
 });
 
 export const GasProductSchema = z.object({
   name: z.string().min(1, "กรุณากรอกชื่อประเภทสินค้า"),
-  sizeKg: z.number().positive("ขนาดถัง (กก.) ต้องมากกว่า 0"),
+  size: z.string().min(1, "กรุณากรอกขนาดถัง"),
 });
 
 export const CylinderSchema = z.object({
   cylinderNo: z.string().min(1, "กรุณากรอกเลขตัวถัง"),
-  qrCode: z.string().min(1, "กรุณากรอก QR Code"),
-  cylinderCode: z.string().optional(),
+  qrCode: z.string().min(1, "กรุณากรอก/สแกน QR Code"),
   productId: z.string().min(1, "กรุณาเลือกประเภทถัง"),
 });
 

@@ -13,7 +13,9 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
       driver: true,
       items: {
         include: {
-          cylinder: true
+          cylinder: {
+            include: { product: true }
+          }
         }
       }
     }
@@ -22,6 +24,16 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
   if (!receipt) {
     return notFound();
   }
+
+  // Group items by cylinder product name
+  const groupedItems = receipt.items.reduce((acc, item) => {
+    const productName = item.cylinder.product?.name || "ถังทั่วไป (ไม่ระบุประเภท)";
+    if (!acc[productName]) {
+      acc[productName] = [];
+    }
+    acc[productName].push(item);
+    return acc;
+  }, {} as Record<string, typeof receipt.items>);
 
   const profile = await prisma.companyProfile.findFirst() || {
     nameEN: "NORTHERN INDUSTRIAL GAS CO.,LTD",
@@ -33,6 +45,10 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
   const dateStr = new Date(receipt.createdAt).toLocaleString("th-TH", {
     year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+
+  const printDateStr = new Date().toLocaleDateString("th-TH", {
+    year: 'numeric', month: '2-digit', day: '2-digit'
   });
 
   return (
@@ -56,7 +72,7 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
         <div style={{ textAlign: "center", fontSize: "16px", fontWeight: "bold", marginBottom: "2px" }}>
           {profile.nameEN}
         </div>
-        <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "4px" }}>
+        <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "4px", whiteSpace: "nowrap", transform: "scale(0.9)", transformOrigin: "center" }}>
           {profile.nameTH}
         </div>
         {profile.tel1 && <div style={{ textAlign: "center", fontSize: "12px", marginBottom: "4px" }}>โทร: {profile.tel1} {profile.tel2 ? `, ${profile.tel2}` : ''}</div>}
@@ -65,24 +81,30 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
         <div style={{ textAlign: "center" }}>ใบรับท่อแก๊สคืน (ชั่วคราว)</div>
         
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
-        <div style={{ marginBottom: "2px" }}>วันที่พิมพ์: {dateStr}</div>
+        <div style={{ marginBottom: "2px" }}>วันที่: {dateStr}</div>
         <div style={{ marginBottom: "2px" }}>อ้างอิง: {receipt.receiptNo}</div>
         <div style={{ marginBottom: "2px" }}>พนักงานรับ: {receipt.driver?.name || "ยังไม่ระบุ"}</div>
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         
-        <div style={{ marginBottom: "2px", fontWeight: "bold" }}>ลูกค้า: {receipt.customer.customerCode || "ทั่วไป"}</div>
-        <div style={{ marginBottom: "2px" }}>{receipt.customer.name}</div>
+        <div style={{ marginBottom: "2px", fontWeight: "bold" }}>ลูกค้า: {receipt.customer.name}</div>
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         
         <div style={{ textAlign: "center", fontWeight: "bold" }}>รายการรับท่อเปล่าคืน</div>
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         
         <div style={{ marginTop: "8px", padding: "0 4px" }}>
-          {receipt.items.map((item, idx) => (
-             <div key={item.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "14px", marginBottom: "4px" }}>
-               <div>{idx + 1}. {item.cylinder.cylinderNo}</div>
-               <div>1 ใบ</div>
-             </div>
+          {Object.entries(groupedItems).map(([productName, items]) => (
+            <div key={productName} style={{ marginBottom: "8px" }}>
+              <div style={{ fontWeight: "bold", fontSize: "13px", borderBottom: "1px dashed #ddd", marginBottom: "4px", paddingBottom: "2px" }}>
+                {productName} 
+              </div>
+              {items.map((item: any, idx: number) => (
+                <div key={item.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "14px", marginBottom: "4px" }}>
+                  <div>{idx + 1}. {item.cylinder.cylinderNo}</div>
+                  <div>1 ใบ</div>
+                </div>
+              ))}
+            </div>
           ))}
         </div>
         
@@ -100,7 +122,7 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
           <br /><br />
           <div>........................................</div>
           <div style={{ marginTop: "5px" }}>(........................................)</div>
-          <div style={{ marginTop: "5px", marginBottom: "20px" }}>วันที่: ....../....../......</div>
+          <div style={{ marginTop: "5px", marginBottom: "20px" }}>วันที่: {printDateStr}</div>
         </div>
       </div>
     </>

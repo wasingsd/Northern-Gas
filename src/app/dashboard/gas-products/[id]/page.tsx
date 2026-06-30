@@ -49,18 +49,17 @@ export default async function EditGasProductPage(props: { params: Promise<{ id: 
             </div>
 
             <div>
-              <label htmlFor="sizeKg" className="block text-sm font-medium text-gray-700 mb-1">
-                ขนาดความจุ (กิโลกรัม) <span className="text-red-500">*</span>
+              <label htmlFor="size" className="block text-sm font-medium text-gray-700 mb-1">
+                ขนาดถัง <span className="text-red-500">*</span>
               </label>
               <input
-                type="number"
-                id="sizeKg"
-                name="sizeKg"
-                step="0.1"
-                min="0.1"
+                type="text"
+                id="size"
+                name="size"
                 required
-                defaultValue={product.sizeKg}
+                defaultValue={product.size}
                 className="w-full rounded-lg border border-border px-4 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                placeholder="เช่น 15 หรือ 7M3"
               />
             </div>
           </div>

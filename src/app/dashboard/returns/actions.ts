@@ -45,17 +45,15 @@ export async function processReturnReceipt(customerId: string, driverId: string 
       await tx.cylinder.update({
         where: { id: c.id },
         data: {
-          status: "RECEIVED_EMPTY",
-          currentCustomerId: null,
-          orderId: null
+          status: "RETURN_REQUESTED",
         }
       });
       
       await tx.cylinderLog.create({
         data: {
           cylinderId: c.id,
-          status: "RECEIVED_EMPTY",
-          notes: `รับคืนจากลูกค้าเข้าคลัง (ใบรับ: ${receiptNo})`
+          status: "RETURN_REQUESTED",
+          notes: `รอตรวจสอบรับคืน (ใบรับ: ${receiptNo})`
         }
       });
     }
@@ -64,5 +62,83 @@ export async function processReturnReceipt(customerId: string, driverId: string 
   });
 
   revalidatePath("/dashboard/returns");
-  redirect(`/print/returns/${receipt.id}`);
+  revalidatePath("/dashboard/returns");
+  redirect("/dashboard/returns");
+}
+
+export async function confirmReturnReceiptAction(receiptId: string) {
+  const receipt = await prisma.returnReceipt.findUnique({
+    where: { id: receiptId },
+    include: { items: { include: { cylinder: true } } }
+  });
+
+  if (!receipt) throw new Error("ไม่พบรายการรับคืน");
+  if (receipt.status === "COMPLETED") throw new Error("รายการนี้ถูกอนุมัติไปแล้ว");
+
+  await prisma.$transaction(async (tx) => {
+    // 1. Update receipt status
+    await tx.returnReceipt.update({
+      where: { id: receiptId },
+      data: { status: "COMPLETED" }
+    });
+
+    // 2. Update cylinders to RECEIVED_EMPTY and remove from customer
+    for (const item of receipt.items) {
+      await tx.cylinder.update({
+        where: { id: item.cylinderId },
+        data: {
+          status: "RECEIVED_EMPTY",
+          currentCustomerId: null,
+          orderId: null
+        }
+      });
+
+      await tx.cylinderLog.create({
+        data: {
+          cylinderId: item.cylinderId,
+          status: "RECEIVED_EMPTY",
+          notes: `อนุมัติรับคืนเข้าคลัง (ใบรับ: ${receipt.receiptNo})`
+        }
+      });
+    }
+  });
+
+  revalidatePath("/dashboard/returns");
+}
+
+export async function cancelReturnReceiptAction(receiptId: string) {
+  const receipt = await prisma.returnReceipt.findUnique({
+    where: { id: receiptId },
+    include: { items: { include: { cylinder: true } } }
+  });
+
+  if (!receipt) throw new Error("ไม่พบรายการรับคืน");
+  if (receipt.status === "COMPLETED") throw new Error("รายการที่อนุมัติแล้วไม่สามารถยกเลิกได้");
+
+  await prisma.$transaction(async (tx) => {
+    // 1. Revert cylinders back to WITH_CUSTOMER
+    for (const item of receipt.items) {
+      await tx.cylinder.update({
+        where: { id: item.cylinderId },
+        data: {
+          status: "WITH_CUSTOMER"
+        }
+      });
+
+      await tx.cylinderLog.create({
+        data: {
+          cylinderId: item.cylinderId,
+          status: "WITH_CUSTOMER",
+          notes: `ยกเลิกรายการรับคืน (${receipt.receiptNo})`
+        }
+      });
+    }
+
+    // 2. Delete the receipt
+    await tx.returnReceipt.delete({
+      where: { id: receiptId }
+    });
+  });
+
+  revalidatePath("/dashboard/returns");
 }

@@ -7,10 +7,9 @@ import { GasProductSchema } from "@/lib/validations";
 
 export async function createGasProductAction(formData: FormData) {
   const name = formData.get("name") as string;
-  const sizeKgStr = formData.get("sizeKg") as string;
-  const sizeKg = parseFloat(sizeKgStr);
+  const size = formData.get("size") as string;
 
-  const parsed = GasProductSchema.safeParse({ name, sizeKg });
+  const parsed = GasProductSchema.safeParse({ name, size });
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0].message);
   }
@@ -18,7 +17,7 @@ export async function createGasProductAction(formData: FormData) {
   await prisma.gasProduct.create({
     data: {
       name,
-      sizeKg,
+      size,
     },
   });
 
@@ -28,10 +27,9 @@ export async function createGasProductAction(formData: FormData) {
 
 export async function updateGasProductAction(id: string, formData: FormData) {
   const name = formData.get("name") as string;
-  const sizeKgStr = formData.get("sizeKg") as string;
-  const sizeKg = parseFloat(sizeKgStr);
+  const size = formData.get("size") as string;
 
-  const parsed = GasProductSchema.safeParse({ name, sizeKg });
+  const parsed = GasProductSchema.safeParse({ name, size });
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0].message);
   }
@@ -40,7 +38,7 @@ export async function updateGasProductAction(id: string, formData: FormData) {
     where: { id },
     data: {
       name,
-      sizeKg,
+      size,
     },
   });
 

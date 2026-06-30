@@ -31,7 +31,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           <div>
             <h2 className="text-2xl font-bold text-foreground">รายละเอียดสินค้า (ถังแก๊ส)</h2>
             <p className="text-sm text-gray-500">
-              เลขตัวถัง: {cylinder.cylinderNo} | รหัสถัง: {cylinder.cylinderCode || "-"}
+              เลขตัวถัง: {cylinder.cylinderNo}
             </p>
           </div>
         </div>
@@ -72,7 +72,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                     {log.status === 'RECEIVED_EMPTY' && 'รับถังเปล่าคืน'}
                     {log.status === 'IN_PROCESS' && 'ส่งบรรจุที่โรงงาน'}
                     {log.status === 'RETURN_REQUESTED' && 'ลูกค้าขอคืนถัง'}
-                    {!['READY_TO_DISPATCH', 'WITH_CUSTOMER', 'RECEIVED_EMPTY', 'IN_PROCESS', 'RETURN_REQUESTED'].includes(log.status) && log.status}
+                    {log.status === 'SENT' && 'ส่งโรงบรรจุ'}
+                    {log.status === 'RECEIVED' && 'รับจากโรงบรรจุ'}
+                    {log.status === 'IN_REFILL' && 'กำลังบรรจุแก๊ส'}
+                    {!['READY_TO_DISPATCH', 'WITH_CUSTOMER', 'RECEIVED_EMPTY', 'IN_PROCESS', 'RETURN_REQUESTED', 'SENT', 'RECEIVED', 'IN_REFILL'].includes(log.status) && log.status}
                   </h4>
                   <time className="text-xs text-gray-500 font-medium">
                     {log.createdAt.toLocaleString('th-TH')}

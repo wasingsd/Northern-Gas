@@ -25,7 +25,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
         </Link>
         <div>
           <h2 className="text-2xl font-bold text-foreground">แก้ไขข้อมูลสินค้า (ถังแก๊ส)</h2>
-          <p className="text-sm text-gray-500">อัปเดตเลขตัวถัง รหัสถัง หรือ QR Code</p>
+          <p className="text-sm text-gray-500">อัปเดตเลขตัวถัง หรือ QR Code</p>
         </div>
       </div>
 
@@ -48,18 +48,6 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
               />
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="cylinderCode" className="text-sm font-medium text-foreground">
-                รหัสถัง
-              </label>
-              <input
-                id="cylinderCode"
-                name="cylinderCode"
-                defaultValue={cylinder.cylinderCode || ""}
-                className="w-full rounded-lg border border-border px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors bg-white text-foreground"
-                placeholder="กรอกรหัสถัง (ตัวอักษร, อักขระพิเศษ, ตัวเลข)"
-              />
-            </div>
 
             <div className="space-y-2">
               <label htmlFor="qrCode" className="text-sm font-medium text-foreground">

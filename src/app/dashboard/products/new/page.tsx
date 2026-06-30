@@ -36,7 +36,7 @@ export default async function NewProductPage() {
                 <option value="">-- เลือกประเภทถังแก๊ส --</option>
                 {products.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} ({p.sizeKg} กก.)
+                    {p.name} ({p.size})
                   </option>
                 ))}
               </select>
@@ -53,16 +53,7 @@ export default async function NewProductPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">รหัสถัง</label>
-              <input
-                type="text"
-                name="cylinderCode"
-                className="w-full rounded-lg border border-border px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
-                placeholder="กรอกรหัสถัง (ตัวอักษร, อักขระพิเศษ, ตัวเลข)"
-              />
-            </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">QR Code (รหัสบาร์โค้ด) <span className="text-red-500">*</span></label>
               <input

@@ -36,8 +36,15 @@ export default async function EditOrderPage({ params }: { params: Promise<{ orde
 
   const customers = await prisma.customer.findMany({ orderBy: { name: "asc" } });
   
-  // We need to fetch all cylinders to allow scanning new ones
-  const allCylinders = await prisma.cylinder.findMany();
+  // We need to fetch cylinders that are either available or already attached to this order
+  const allCylinders = await prisma.cylinder.findMany({
+    where: {
+      OR: [
+        { orderId: null, currentCustomerId: null, status: { not: "WITH_CUSTOMER" } },
+        { orderId: order.id }
+      ]
+    }
+  });
 
   // Get cylinders that are currently associated with this order
   const orderCylinders = await prisma.cylinder.findMany({

@@ -9,7 +9,7 @@ export default async function OrdersPage() {
   const orders = await prisma.order.findMany({
     include: {
       customer: true,
-      cylinders: true,
+      items: true,
       deliveryJob: true,
     },
     orderBy: { createdAt: "desc" },
@@ -72,10 +72,9 @@ export default async function OrdersPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="font-medium text-foreground">{o.customer.name}</div>
-                      <div className="text-xs text-gray-500 line-clamp-1">{o.customer.address || "-"}</div>
                     </td>
                     <td className="px-6 py-4 text-gray-700">
-                      จำนวน {o.cylinders.length} ถัง
+                      จำนวน {o.items.reduce((sum, item) => sum + item.quantity, 0)} ถัง
                     </td>
 
                     <td className="px-6 py-4 text-center">

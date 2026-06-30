@@ -35,7 +35,7 @@ export default async function GasProductsPage() {
             <thead className="bg-surface text-gray-700">
               <tr>
                 <th className="px-6 py-4 font-medium">ชื่อประเภทสินค้า</th>
-                <th className="px-6 py-4 font-medium">ขนาด (กก.)</th>
+                <th className="px-6 py-4 font-medium">ขนาด</th>
                 <th className="px-6 py-4 font-medium">จำนวนถังในระบบ</th>
                 <th className="px-6 py-4 font-medium text-right">จัดการ</th>
               </tr>
@@ -51,7 +51,7 @@ export default async function GasProductsPage() {
                 products.map((p) => (
                   <tr key={p.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 font-bold text-primary">{p.name}</td>
-                    <td className="px-6 py-4 text-gray-800">{p.sizeKg} กก.</td>
+                    <td className="px-6 py-4 text-gray-800">{p.size}</td>
                     <td className="px-6 py-4 text-gray-700">{p._count.cylinders} ใบ</td>
                     <td className="px-6 py-4 flex items-center justify-end gap-2">
                       <Link

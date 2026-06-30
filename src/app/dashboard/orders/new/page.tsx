@@ -9,8 +9,13 @@ import prisma from "@/lib/prisma";
 
 export default async function NewOrderPage() {
   const customers = await prisma.customer.findMany({ orderBy: { name: "asc" } });
-  const cylinders = await prisma.cylinder.findMany();
-
+  const cylinders = await prisma.cylinder.findMany({
+    where: {
+      orderId: null,
+      currentCustomerId: null,
+      status: { not: "WITH_CUSTOMER" }
+    }
+  });
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">

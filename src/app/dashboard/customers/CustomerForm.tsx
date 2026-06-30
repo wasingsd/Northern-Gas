@@ -8,9 +8,6 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 
 export default function CustomerForm({ initialData }: { initialData?: any }) {
-  const [taxType, setTaxType] = useState(initialData?.taxType || "UNSPECIFIED");
-  const [taxId, setTaxId] = useState(initialData?.taxId || "");
-  const [phone, setPhone] = useState(initialData?.phone || "");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
   const [modalConfig, setModalConfig] = useState<{isOpen: boolean, type: 'error' | 'confirm' | 'success', message: string, onConfirm?: () => void}>({ isOpen: false, type: 'error', message: '' });
@@ -23,8 +20,6 @@ export default function CustomerForm({ initialData }: { initialData?: any }) {
     const newErrors: { [key: string]: string } = {};
     const formData = new FormData(e.currentTarget);
     if (!formData.get("name")) newErrors.name = "กรุณากรอกชื่อลูกค้า";
-    if (taxType === "INDIVIDUAL" && taxId.length !== 13) newErrors.taxId = "กรุณากรอกตัวเลข 13 หลัก";
-    if (phone.length !== 10) newErrors.phone = "กรุณากรอกตัวเลข 10 หลัก";
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -33,9 +28,6 @@ export default function CustomerForm({ initialData }: { initialData?: any }) {
     setErrors({});
 
     setLoading(true);
-    formData.set("taxType", taxType); // Ensure radio selection is passed
-    formData.set("taxId", taxId);
-    formData.set("phone", phone);
 
     try {
       if (initialData?.id) {
@@ -148,97 +140,16 @@ export default function CustomerForm({ initialData }: { initialData?: any }) {
 
       <form onSubmit={handleSubmit} noValidate className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-        <div className="w-full md:w-48 text-gray-700 font-medium">ประเภทผู้เสียภาษี</div>
-        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="radio" 
-              name="taxType" 
-              value="UNSPECIFIED" 
-              checked={taxType === "UNSPECIFIED"} 
-              onChange={() => setTaxType("UNSPECIFIED")}
-              className="text-primary focus:ring-primary"
-            />
-            <span className="text-gray-700">ไม่ระบุ</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="radio" 
-              name="taxType" 
-              value="INDIVIDUAL" 
-              checked={taxType === "INDIVIDUAL"} 
-              onChange={() => setTaxType("INDIVIDUAL")}
-              className="text-primary focus:ring-primary"
-            />
-            <span className="text-gray-700">บุคคลธรรมดา</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="radio" 
-              name="taxType" 
-              value="CORPORATE" 
-              checked={taxType === "CORPORATE"} 
-              onChange={() => setTaxType("CORPORATE")}
-              className="text-primary focus:ring-primary"
-            />
-            <span className="text-gray-700">นิติบุคคล</span>
-          </label>
-        </div>
-      </div>
-
-      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
         <div className="w-full md:w-48 text-gray-700 font-medium">ชื่อลูกค้า <span className="text-red-500">*</span></div>
         <div className="flex-1">
           <input 
             type="text" 
             name="name" 
             defaultValue={initialData?.name}
-            placeholder="พิมพ์ ชื่อ,รหัส" 
+            placeholder="พิมพ์ ชื่อลูกค้า" 
             className={`w-full max-w-2xl rounded-lg border px-4 py-2 outline-none focus:ring-1 ${errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border focus:border-primary focus:ring-primary'}`}
           />
           {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-        </div>
-      </div>
-
-      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-        <div className="w-full md:w-48 text-gray-700 font-medium">
-          เลขประจำตัวผู้เสียภาษี 
-          {taxType === "INDIVIDUAL" && <span className="text-red-500 ml-1">*</span>}
-        </div>
-        <div className="flex-1">
-          <input 
-            type="text" 
-            name="taxId" 
-            value={taxId}
-            onChange={(e) => setTaxId(e.target.value.replace(/\D/g, '').slice(0, 13))}
-            placeholder={taxType === "INDIVIDUAL" ? "เลข 13 หลัก" : ""}
-            className={`w-full max-w-2xl rounded-lg border px-4 py-2 outline-none focus:ring-1 ${errors.taxId ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border focus:border-primary focus:ring-primary'}`}
-          />
-          {errors.taxId && <p className="text-red-500 text-sm mt-1">{errors.taxId}</p>}
-        </div>
-      </div>
-
-      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-        <div className="w-full md:w-48 text-gray-700 font-medium">ชื่อสาขา</div>
-        <div className="flex-1">
-          <input 
-            type="text" 
-            name="branchName" 
-            defaultValue={initialData?.branchName}
-            className="w-full max-w-2xl rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-        <div className="w-full md:w-48 text-gray-700 font-medium">เลขที่สาขา</div>
-        <div className="flex-1">
-          <input 
-            type="text" 
-            name="branchNo" 
-            defaultValue={initialData?.branchNo}
-            className="w-full max-w-2xl rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
         </div>
       </div>
 
@@ -249,49 +160,13 @@ export default function CustomerForm({ initialData }: { initialData?: any }) {
             type="text" 
             name="customerCode" 
             defaultValue={initialData?.customerCode}
+            placeholder="ตัวอย่าง: CUST-001"
             className="w-full max-w-2xl rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
           />
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-        <div className="w-full md:w-48 text-gray-700 font-medium">เบอร์โทรศัพท์ลูกค้า <span className="text-red-500">*</span></div>
-        <div className="flex-1">
-          <input 
-            type="text" 
-            name="phone" 
-            value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-            placeholder="ตัวเลข 10 หลัก"
-            className={`w-full max-w-2xl rounded-lg border px-4 py-2 outline-none focus:ring-1 ${errors.phone ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border focus:border-primary focus:ring-primary'}`}
-          />
-          {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
-        </div>
-      </div>
 
-      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-        <div className="w-full md:w-48 text-gray-700 font-medium">อีเมลลูกค้า</div>
-        <div className="flex-1">
-          <input 
-            type="email" 
-            name="email" 
-            defaultValue={initialData?.email}
-            className="w-full max-w-2xl rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col md:flex-row md:items-start gap-2 md:gap-6">
-        <div className="w-full md:w-48 text-gray-700 font-medium pt-2">ที่อยู่ลูกค้า</div>
-        <div className="flex-1">
-          <textarea 
-            name="address" 
-            defaultValue={initialData?.address}
-            rows={4}
-            className="w-full max-w-2xl rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"
-          />
-        </div>
-      </div>
 
       <div className="flex justify-between max-w-3xl pt-8 border-t border-border">
         {initialData?.id ? (

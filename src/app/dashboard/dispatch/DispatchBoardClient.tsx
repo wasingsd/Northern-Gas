@@ -56,17 +56,21 @@ export default function DispatchBoardClient({ initialJobs }: { initialJobs: any[
                     <MapPin className="h-3 w-3 shrink-0 mt-0.5 text-gray-400" />
                     <span className="line-clamp-2">{job.address}</span>
                   </div>
-                  <div className="text-xs text-gray-600 flex items-center gap-1 mb-3">
-                    <Phone className="h-3 w-3 text-gray-400" />
-                    {job.order.customer.phone || "-"}
-                  </div>
-
                   <div className="bg-surface p-2 rounded text-xs mb-3 space-y-1">
-                    {job.order.cylinders.map((cyl: any) => (
-                      <div key={cyl.id} className="flex justify-between text-gray-700">
-                        <span>{cyl.cylinderNo}</span>
-                      </div>
-                    ))}
+                    {job.order.items && job.order.items.length > 0 ? (
+                      job.order.items.map((item: any) => (
+                        <div key={item.id} className="flex justify-between text-gray-700">
+                          <span>{item.product?.name || "ไม่ระบุ"}</span>
+                          <span className="font-medium">{item.quantity} ถัง</span>
+                        </div>
+                      ))
+                    ) : (
+                      job.order.cylinders.map((cyl: any) => (
+                        <div key={cyl.id} className="flex justify-between text-gray-700">
+                          <span>{cyl.cylinderNo}</span>
+                        </div>
+                      ))
+                    )}
                   </div>
                   
                   <div className="flex justify-between items-center mt-3 pt-3 border-t border-border">

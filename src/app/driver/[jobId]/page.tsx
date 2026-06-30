@@ -58,20 +58,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
             </div>
           </div>
 
-          {/* Contact */}
-          {customer.phone && (
-            <div className="flex gap-4">
-              <div className="bg-gray-700/50 p-3 rounded-2xl h-fit shadow-inner">
-                <Phone className="h-5 w-5 text-green-400" />
-              </div>
-              <div>
-                <p className="text-xs font-bold tracking-wider text-gray-500 uppercase mb-1">เบอร์ติดต่อ</p>
-                <a href={`tel:${customer.phone}`} className="text-lg font-medium text-blue-400">
-                  {customer.phone}
-                </a>
-              </div>
-            </div>
-          )}
+
 
           {/* Products */}
           <div className="border-t border-gray-700/50 pt-6">

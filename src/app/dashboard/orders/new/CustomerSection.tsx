@@ -5,28 +5,14 @@ import { useState, useRef, useEffect } from "react";
 type Customer = {
   id: string;
   name: string;
-  taxType: string;
-  taxId: string | null;
-  branchName: string | null;
-  branchNo: string | null;
   customerCode: string | null;
-  phone: string | null;
-  email: string | null;
-  address: string | null;
 };
 
 export default function CustomerSection({ customers, initialData }: { customers: Customer[], initialData?: Customer }) {
   const [query, setQuery] = useState(initialData?.name || "");
   const [showDropdown, setShowDropdown] = useState(false);
   
-  const [taxType, setTaxType] = useState(initialData?.taxType || "UNSPECIFIED");
-  const [taxId, setTaxId] = useState(initialData?.taxId || "");
-  const [branchName, setBranchName] = useState(initialData?.branchName || "");
-  const [branchNo, setBranchNo] = useState(initialData?.branchNo || "");
   const [customerCode, setCustomerCode] = useState(initialData?.customerCode || "");
-  const [phone, setPhone] = useState(initialData?.phone || "");
-  const [email, setEmail] = useState(initialData?.email || "");
-  const [address, setAddress] = useState(initialData?.address || "");
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -48,14 +34,7 @@ export default function CustomerSection({ customers, initialData }: { customers:
 
   const handleSelectCustomer = (c: Customer) => {
     setQuery(c.name);
-    setTaxType(c.taxType || "UNSPECIFIED");
-    setTaxId(c.taxId || "");
-    setBranchName(c.branchName || "");
-    setBranchNo(c.branchNo || "");
     setCustomerCode(c.customerCode || "");
-    setPhone(c.phone || "");
-    setEmail(c.email || "");
-    setAddress(c.address || "");
     setShowDropdown(false);
   };
 
@@ -71,7 +50,7 @@ export default function CustomerSection({ customers, initialData }: { customers:
       {/* Search / Name Field with Dropdown */}
       <div className="relative" ref={wrapperRef}>
         <div className="flex items-center gap-6">
-          <div className="w-48 text-gray-700 font-medium">ค้นหา / ชื่อลูกค้า <span className="text-red-500">*</span></div>
+          <div className="w-48 text-gray-700 font-medium">ค้นหา / ชื่อ หรือ รหัสลูกค้า <span className="text-red-500">*</span></div>
           <div className="flex-1 relative">
             <input 
               type="text" 
@@ -81,7 +60,7 @@ export default function CustomerSection({ customers, initialData }: { customers:
               onFocus={() => setShowDropdown(true)}
               required
               autoComplete="off"
-              placeholder="พิมพ์ชื่อลูกค้า เพื่อค้นหาหรือสร้างใหม่" 
+              placeholder="พิมพ์ชื่อ หรือ รหัสลูกค้า เพื่อค้นหาหรือสร้างใหม่" 
               className="w-full rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
             />
             
@@ -95,7 +74,6 @@ export default function CustomerSection({ customers, initialData }: { customers:
                   >
                     <div>
                       <span className="font-medium text-foreground">{c.name}</span>
-                      {c.phone && <span className="text-sm text-gray-500 ml-2">({c.phone})</span>}
                     </div>
                     {c.customerCode && <span className="text-xs text-gray-400">{c.customerCode}</span>}
                   </li>
@@ -106,27 +84,9 @@ export default function CustomerSection({ customers, initialData }: { customers:
         </div>
       </div>
 
-      {/* Hidden Fields to retain data when a customer is selected */}
-      <input type="hidden" name="customerTaxType" value={taxType} />
-      <input type="hidden" name="customerTaxId" value={taxId} />
-      <input type="hidden" name="customerBranchName" value={branchName} />
-      <input type="hidden" name="customerBranchNo" value={branchNo} />
-      <input type="hidden" name="customerPhone" value={phone} />
-      <input type="hidden" name="customerEmail" value={email} />
-      <input type="hidden" name="customerAddress" value={address} />
 
-      <div className="flex items-center gap-6">
-        <div className="w-48 text-gray-700 font-medium">รหัสลูกค้า</div>
-        <div className="flex-1">
-          <input 
-            type="text" 
-            name="customerCode" 
-            value={customerCode}
-            onChange={e => setCustomerCode(e.target.value)}
-            className="w-full rounded-lg border border-border px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-        </div>
-      </div>
+
+      <input type="hidden" name="customerCode" value={customerCode} />
     </div>
   );
 }

@@ -7,14 +7,7 @@ import { CreateOrderSchema } from "@/lib/validations";
 
 export async function createOrderAction(formData: FormData) {
   const customerName = formData.get("customerName") as string;
-  const customerTaxType = formData.get("customerTaxType") as string;
-  const customerTaxId = formData.get("customerTaxId") as string;
-  const customerBranchName = formData.get("customerBranchName") as string;
-  const customerBranchNo = formData.get("customerBranchNo") as string;
   const customerCode = formData.get("customerCode") as string;
-  const customerPhone = formData.get("customerPhone") as string;
-  const customerEmail = formData.get("customerEmail") as string;
-  const customerAddress = formData.get("customerAddress") as string;
   
   const cylinderIdsJson = formData.get("cylinderIds") as string;
   let cylinderIds: string[] = [];
@@ -35,14 +28,7 @@ export async function createOrderAction(formData: FormData) {
   });
 
   const customerDataToUpdate = {
-    ...(customerTaxType ? { taxType: customerTaxType } : {}),
-    ...(customerTaxId ? { taxId: customerTaxId } : {}),
-    ...(customerBranchName ? { branchName: customerBranchName } : {}),
-    ...(customerBranchNo ? { branchNo: customerBranchNo } : {}),
-    ...(customerCode ? { customerCode: customerCode } : {}),
-    ...(customerPhone ? { phone: customerPhone } : {}),
-    ...(customerEmail ? { email: customerEmail } : {}),
-    ...(customerAddress ? { address: customerAddress } : {})
+    ...(customerCode ? { customerCode: customerCode } : {})
   };
 
   if (!customer) {
@@ -95,6 +81,19 @@ export async function createOrderAction(formData: FormData) {
   const orderNo = `DSP-${datePrefix}${seqStr}`; 
   const jobNo = `JOB-${datePrefix}${seqStr}`;
 
+  // Group selected cylinders by productId to create OrderItems
+  const selectedCylinders = await prisma.cylinder.findMany({ where: { id: { in: cylinderIds } } });
+  const productCounts: Record<string, number> = {};
+  for (const c of selectedCylinders) {
+    if (c.productId) {
+      productCounts[c.productId] = (productCounts[c.productId] || 0) + 1;
+    }
+  }
+  const orderItemsData = Object.entries(productCounts).map(([productId, quantity]) => ({
+    productId,
+    quantity
+  }));
+
   const order = await prisma.order.create({
     data: {
       orderNo,
@@ -104,8 +103,11 @@ export async function createOrderAction(formData: FormData) {
         create: {
           jobNo,
           status: "WAITING",
-          address: customer.address || "รับที่ร้าน"
+          address: "รับที่ร้าน"
         }
+      },
+      items: {
+        create: orderItemsData
       }
     }
   });
@@ -132,19 +134,12 @@ export async function createOrderAction(formData: FormData) {
 
   revalidatePath("/dashboard/orders");
   revalidatePath("/dashboard/dispatch");
-  redirect("/dashboard/orders");
+  return { success: true, redirectTo: "/dashboard/orders" };
 }
 
 export async function updateOrderAction(orderId: string, formData: FormData) {
   const customerName = formData.get("customerName") as string;
-  const customerTaxType = formData.get("customerTaxType") as string;
-  const customerTaxId = formData.get("customerTaxId") as string;
-  const customerBranchName = formData.get("customerBranchName") as string;
-  const customerBranchNo = formData.get("customerBranchNo") as string;
   const customerCode = formData.get("customerCode") as string;
-  const customerPhone = formData.get("customerPhone") as string;
-  const customerEmail = formData.get("customerEmail") as string;
-  const customerAddress = formData.get("customerAddress") as string;
   
   const cylinderIdsJson = formData.get("cylinderIds") as string;
   let cylinderIds: string[] = [];
@@ -168,14 +163,7 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
 
   const customerDataToUpdate = {
     name: customerName,
-    ...(customerTaxType ? { taxType: customerTaxType } : {}),
-    ...(customerTaxId ? { taxId: customerTaxId } : {}),
-    ...(customerBranchName ? { branchName: customerBranchName } : {}),
-    ...(customerBranchNo ? { branchNo: customerBranchNo } : {}),
-    ...(customerCode ? { customerCode: customerCode } : {}),
-    ...(customerPhone ? { phone: customerPhone } : {}),
-    ...(customerEmail ? { email: customerEmail } : {}),
-    ...(customerAddress ? { address: customerAddress } : {})
+    ...(customerCode ? { customerCode: customerCode } : {})
   };
 
   await prisma.customer.update({
@@ -188,6 +176,31 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
     await prisma.cylinder.updateMany({
       where: { orderId: order.id },
       data: { orderId: null, status: "READY_TO_DISPATCH" }
+    });
+  }
+
+  // Delete old order items
+  await prisma.orderItem.deleteMany({
+    where: { orderId: order.id }
+  });
+
+  // Group new cylinders by productId to create new OrderItems
+  const selectedCylinders = await prisma.cylinder.findMany({ where: { id: { in: cylinderIds } } });
+  const productCounts: Record<string, number> = {};
+  for (const c of selectedCylinders) {
+    if (c.productId) {
+      productCounts[c.productId] = (productCounts[c.productId] || 0) + 1;
+    }
+  }
+  const orderItemsData = Object.entries(productCounts).map(([productId, quantity]) => ({
+    orderId: order.id,
+    productId,
+    quantity
+  }));
+  
+  if (orderItemsData.length > 0) {
+    await prisma.orderItem.createMany({
+      data: orderItemsData
     });
   }
 
@@ -213,7 +226,7 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
 
   revalidatePath("/dashboard/orders");
   revalidatePath(`/dashboard/orders/${order.id}`);
-  redirect(`/dashboard/orders/${order.id}`);
+  return { success: true, redirectTo: `/dashboard/orders/${order.id}` };
 }
 
 export async function markOrderAsReadyAction(orderId: string) {

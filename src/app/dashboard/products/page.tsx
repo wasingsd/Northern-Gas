@@ -32,7 +32,7 @@ export default async function ProductsPage() {
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
             <input
               type="text"
-              placeholder="ค้นหาเลขตัวถัง, รหัสถัง, QR Code..."
+              placeholder="ค้นหาเลขตัวถัง, QR Code..."
               className="w-full rounded-lg border border-border pl-9 pr-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
@@ -43,7 +43,6 @@ export default async function ProductsPage() {
             <thead className="bg-surface text-gray-700">
               <tr>
                 <th className="px-6 py-4 font-medium">เลขตัวถัง</th>
-                <th className="px-6 py-4 font-medium">รหัสถัง</th>
                 <th className="px-6 py-4 font-medium">ประเภทถัง</th>
                 <th className="px-6 py-4 font-medium">QR Code</th>
                 <th className="px-6 py-4 font-medium text-center">สถานะปัจจุบัน</th>
@@ -65,7 +64,6 @@ export default async function ProductsPage() {
                         {c.cylinderNo || "-"}
                       </Link>
                     </td>
-                    <td className="px-6 py-4 text-gray-800">{c.cylinderCode || "-"}</td>
                     <td className="px-6 py-4 text-gray-700">{c.product?.name || "-"}</td>
                     <td className="px-6 py-4 text-gray-700">{c.qrCode}</td>
                     <td className="px-6 py-4 text-center">
@@ -73,14 +71,20 @@ export default async function ProductsPage() {
                         ${c.status === 'READY_TO_DISPATCH' ? 'bg-green-50 text-green-700' : 
                           c.status === 'WITH_CUSTOMER' ? 'bg-blue-50 text-blue-700' : 
                           c.status === 'RECEIVED_EMPTY' ? 'bg-yellow-50 text-yellow-700' : 
-                          c.status === 'IN_PROCESS' ? 'bg-purple-50 text-purple-700' : 
+                          c.status === 'IN_PROCESS' ? 'bg-purple-50 text-purple-700' :  
                           c.status === 'RETURN_REQUESTED' ? 'bg-orange-50 text-orange-700' : 
+                          c.status === 'SENT' ? 'bg-indigo-50 text-indigo-700' : 
+                          c.status === 'RECEIVED' ? 'bg-teal-50 text-teal-700' : 
+                          c.status === 'IN_REFILL' ? 'bg-fuchsia-50 text-fuchsia-700' : 
                           'bg-gray-100 text-gray-700'}`}>
                         {c.status === 'READY_TO_DISPATCH' ? 'พร้อมใช้งาน' : 
                          c.status === 'WITH_CUSTOMER' ? 'อยู่กับลูกค้า' : 
                          c.status === 'RECEIVED_EMPTY' ? 'ถังเปล่า' : 
                          c.status === 'IN_PROCESS' ? 'ส่งบรรจุที่โรงงาน' : 
                          c.status === 'RETURN_REQUESTED' ? 'ลูกค้ารอคืนถัง' : 
+                         c.status === 'SENT' ? 'ส่งโรงบรรจุ' : 
+                         c.status === 'RECEIVED' ? 'รับจากโรงบรรจุ' : 
+                         c.status === 'IN_REFILL' ? 'กำลังบรรจุแก๊ส' : 
                          c.status}
                       </span>
                     </td>

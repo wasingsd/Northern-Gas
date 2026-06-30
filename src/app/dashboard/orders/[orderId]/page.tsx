@@ -81,24 +81,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
               </div>
             )}
 
-            {order.customer.phone && (
-              <div className="grid grid-cols-3 text-gray-500">
-                <span><Phone className="h-4 w-4 inline mr-1" /> เบอร์โทรศัพท์</span>
-                <span className="col-span-2 font-medium text-foreground">{order.customer.phone}</span>
-              </div>
-            )}
 
-            {order.customer.email && (
-              <div className="grid grid-cols-3 text-gray-500">
-                <span><Mail className="h-4 w-4 inline mr-1" /> อีเมล</span>
-                <span className="col-span-2 font-medium text-foreground">{order.customer.email}</span>
-              </div>
-            )}
-
-            <div className="grid grid-cols-3 text-gray-500">
-              <span><MapPin className="h-4 w-4 inline mr-1" /> ที่อยู่จัดส่ง</span>
-              <span className="col-span-2 font-medium text-foreground">{order.customer.address || "-"}</span>
-            </div>
           </div>
         </div>
 

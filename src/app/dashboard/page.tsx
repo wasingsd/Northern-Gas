@@ -3,18 +3,23 @@ import { PackageOpen, CheckCircle2, Clock, AlertTriangle, Database, RefreshCw, T
 import prisma from "@/lib/prisma";
 import DashboardTimeline from "./DashboardTimeline";
 
-export default async function DashboardPage(props: { searchParams: Promise<{ days?: string }> }) {
-  const searchParams = await props.searchParams;
-  const daysParam = parseInt(searchParams?.days || "7", 10);
-  const filterDays = isNaN(daysParam) ? 7 : daysParam;
-  
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+import DateRangeFilter from "./DateRangeFilter";
 
-  // 1. Order stats for today
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const ordersToday = await prisma.order.count({
-    where: { createdAt: { gte: startOfDay } }
+export default async function DashboardPage(props: { searchParams?: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await props.searchParams;
+  
+  // Parse dates from query params or default to today in Bangkok timezone
+  const todayStr = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date());
+  const startParam = typeof searchParams?.start === 'string' ? searchParams.start : todayStr;
+  const endParam = typeof searchParams?.end === 'string' ? searchParams.end : todayStr;
+
+  // Construct start/end dates for Prisma (Force Bangkok Time UTC+7)
+  const localStartDate = new Date(`${startParam}T00:00:00+07:00`);
+  const localEndDate = new Date(`${endParam}T23:59:59+07:00`);
+
+  // 1. Order stats in period
+  const ordersInPeriod = await prisma.order.count({
+    where: { createdAt: { gte: localStartDate, lte: localEndDate } }
   });
 
   // 2. Dispatch stats
@@ -22,10 +27,10 @@ export default async function DashboardPage(props: { searchParams: Promise<{ day
     where: { status: { in: ["WAITING", "OUT_FOR_DELIVERY"] } }
   });
   
-  const deliveredToday = await prisma.deliveryJob.count({
+  const deliveredInPeriod = await prisma.deliveryJob.count({
     where: { 
       status: "DELIVERED",
-      updatedAt: { gte: startOfDay }
+      updatedAt: { gte: localStartDate, lte: localEndDate }
     }
   });
 
@@ -44,24 +49,21 @@ export default async function DashboardPage(props: { searchParams: Promise<{ day
   const inProcessCount = getCylCount("IN_PROCESS");
   const withCustomerCount = getCylCount("WITH_CUSTOMER");
 
-  // 4. Monthly Cylinders Sold
-  const monthlyOrders = await prisma.order.findMany({
+  // 4. Cylinders Sold in period
+  const periodOrders = await prisma.order.findMany({
     where: {
-      createdAt: { gte: startOfMonth },
+      createdAt: { gte: localStartDate, lte: localEndDate },
       status: { not: "CANCELLED" }
     },
     include: { cylinders: true }
   });
   
-  const monthlyCylindersSold = monthlyOrders.reduce((sum, order) => sum + order.cylinders.length, 0);
+  const cylindersSoldInPeriod = periodOrders.reduce((sum, order) => sum + order.cylinders.length, 0);
 
   // 5. Timeline Logs
-  const filterDate = new Date(now);
-  filterDate.setDate(filterDate.getDate() - filterDays);
-  
   const logs = await prisma.cylinderLog.findMany({
     where: {
-      createdAt: filterDays === 0 ? { gte: startOfDay } : { gte: filterDate }
+      createdAt: { gte: localStartDate, lte: localEndDate }
     },
     include: { cylinder: true },
     orderBy: { createdAt: "desc" },
@@ -73,7 +75,10 @@ export default async function DashboardPage(props: { searchParams: Promise<{ day
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-foreground">ภาพรวมระบบ (Dashboard)</h2>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h2 className="text-2xl font-bold text-foreground">ภาพรวมระบบ (Dashboard)</h2>
+        <DateRangeFilter />
+      </div>
       
       {/* Primary Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -83,8 +88,8 @@ export default async function DashboardPage(props: { searchParams: Promise<{ day
               <PackageOpen className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500">ถังที่ขายได้เดือนนี้</p>
-              <h3 className="text-2xl font-bold text-foreground">{monthlyCylindersSold} <span className="text-base font-normal text-gray-500">ถัง</span></h3>
+              <p className="text-sm font-medium text-gray-500">ถังที่ขายได้ในรอบนี้</p>
+              <h3 className="text-2xl font-bold text-foreground">{cylindersSoldInPeriod} <span className="text-base font-normal text-gray-500">ถัง</span></h3>
             </div>
           </div>
         </div>
@@ -95,8 +100,8 @@ export default async function DashboardPage(props: { searchParams: Promise<{ day
               <PackageOpen className="h-6 w-6 text-indigo-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500">ออเดอร์วันนี้</p>
-              <h3 className="text-2xl font-bold text-foreground">{ordersToday}</h3>
+              <p className="text-sm font-medium text-gray-500">ออเดอร์ในรอบนี้</p>
+              <h3 className="text-2xl font-bold text-foreground">{ordersInPeriod}</h3>
             </div>
           </div>
         </div>
@@ -119,8 +124,8 @@ export default async function DashboardPage(props: { searchParams: Promise<{ day
               <CheckCircle2 className="h-6 w-6 text-green-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500">ส่งสำเร็จวันนี้</p>
-              <h3 className="text-2xl font-bold text-foreground">{deliveredToday}</h3>
+              <p className="text-sm font-medium text-gray-500">ส่งสำเร็จในรอบนี้</p>
+              <h3 className="text-2xl font-bold text-foreground">{deliveredInPeriod}</h3>
             </div>
           </div>
         </div>
@@ -163,7 +168,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ day
       </div>
 
       {/* Timeline Section */}
-      <DashboardTimeline logs={plainLogs} currentDays={filterDays} />
+      <DashboardTimeline logs={plainLogs} />
     </div>
   );
 }

@@ -8,11 +8,10 @@ import { CylinderSchema } from "@/lib/validations";
 export async function createCylinderAction(formData: FormData) {
   const cylinderNo = formData.get("cylinderNo") as string;
   const qrCode = formData.get("qrCode") as string;
-  const cylinderCode = formData.get("cylinderCode") as string;
   const productId = formData.get("productId") as string;
   const redirectTo = formData.get("redirectTo") as string || "/dashboard/products";
   
-  const parsed = CylinderSchema.safeParse({ cylinderNo, qrCode, cylinderCode, productId });
+  const parsed = CylinderSchema.safeParse({ cylinderNo, qrCode, productId });
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0].message);
   }
@@ -21,7 +20,6 @@ export async function createCylinderAction(formData: FormData) {
     data: {
       cylinderNo,
       qrCode,
-      cylinderCode,
       productId,
       status: "READY_TO_DISPATCH", // default status
     }
@@ -42,11 +40,10 @@ export async function createCylinderAction(formData: FormData) {
 export async function updateCylinderAction(id: string, formData: FormData) {
   const cylinderNo = formData.get("cylinderNo") as string;
   const qrCode = formData.get("qrCode") as string;
-  const cylinderCode = formData.get("cylinderCode") as string;
   const productId = formData.get("productId") as string;
   const redirectTo = formData.get("redirectTo") as string || `/dashboard/products/${id}`;
   
-  const parsed = CylinderSchema.safeParse({ cylinderNo, qrCode, cylinderCode, productId });
+  const parsed = CylinderSchema.safeParse({ cylinderNo, qrCode, productId });
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0].message);
   }
@@ -56,7 +53,6 @@ export async function updateCylinderAction(id: string, formData: FormData) {
     data: {
       cylinderNo,
       qrCode,
-      cylinderCode,
       productId,
     }
   });
