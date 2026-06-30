@@ -27,7 +27,11 @@ export default async function PrintOrderPage(props: { params: Promise<{ orderId:
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   });
 
-  // Removed grouping by cylinderCode as requested
+  const profile = await prisma.companyProfile.findFirst() || {
+    nameEN: "NORTHERN INDUSTRIAL GAS CO.,LTD",
+    nameTH: "บริษัท นอร์ทเธิร์น อินดัสเตรียลแก๊ส จำกัด",
+    tel1: "053-091234-5"
+  };
 
   return (
     <>
@@ -40,10 +44,15 @@ export default async function PrintOrderPage(props: { params: Promise<{ orderId:
         margin: "0 auto",
         padding: "0"
       }}>
-        <div style={{ textAlign: "center", fontSize: "16px", fontWeight: "bold", marginBottom: "4px" }}>
-          Thai Special Gas Co.,Ltd
+        <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "2px" }}>
+          {profile.nameEN}
         </div>
-        <div style={{ textAlign: "center", fontWeight: "bold" }}>CD - Cylinder Delivery</div>
+        <div style={{ textAlign: "center", fontSize: "12px", fontWeight: "bold", marginBottom: "4px" }}>
+          {profile.nameTH}
+        </div>
+        {profile.tel1 && <div style={{ textAlign: "center", fontSize: "10px", marginBottom: "4px" }}>โทร: {profile.tel1} {profile.tel2 ? `, ${profile.tel2}` : ''}</div>}
+        
+        <div style={{ textAlign: "center", fontWeight: "bold", marginTop: "8px" }}>CD - Cylinder Delivery</div>
         <div style={{ textAlign: "center" }}>ใบส่งท่อแก๊ส</div>
         
         <div style={{ textAlign: "center", margin: "8px 0" }}>[ QR CODE ]</div>

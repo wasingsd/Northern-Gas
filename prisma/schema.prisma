@@ -9,55 +9,58 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  supabaseId   String?       @unique // links to Supabase auth.uid()
-  name         String
-  email        String        @unique
-  password     String        @default("") // kept for migration safety; auth handled by Supabase
-  role         String        @default("OWNER")
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  deliveryJobs DeliveryJob[]
+  id             String          @id @default(cuid())
+  supabaseId     String?         @unique // links to Supabase auth.uid()
+  name           String
+  email          String          @unique
+  password       String          @default("") // kept for migration safety; auth handled by Supabase
+  role           String          @default("OWNER")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deliveryJobs   DeliveryJob[]
+  returnReceipts ReturnReceipt[]
 }
 
 model Customer {
-  id           String     @id @default(cuid())
-  customerCode String?    @unique
-  name         String
-  taxType      String     @default("UNSPECIFIED")
-  taxId        String?
-  branchName   String?
-  branchNo     String?
-  phone        String?
-  email        String?
-  lineId       String?
-  address      String?
-  lat          Float?
-  lng          Float?
-  type         String     @default("GENERAL")
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  cylinders    Cylinder[]
-  orders       Order[]
+  id             String          @id @default(cuid())
+  customerCode   String?         @unique
+  name           String
+  taxType        String          @default("UNSPECIFIED")
+  taxId          String?
+  branchName     String?
+  branchNo       String?
+  phone          String?
+  email          String?
+  lineId         String?
+  address        String?
+  lat            Float?
+  lng            Float?
+  type           String          @default("GENERAL")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  cylinders      Cylinder[]
+  orders         Order[]
+  returnReceipts ReturnReceipt[]
 }
 
 model Cylinder {
-  id                String        @id @default(cuid())
-  cylinderNo        String        @unique
-  qrCode            String        @unique
-  cylinderCode      String?
-  status            String
-  currentCustomerId String?
-  orderId           String?
-  productId         String?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  refillBatchId     String?
-  refillBatch       RefillBatch?  @relation(fields: [refillBatchId], references: [id])
-  order             Order?        @relation(fields: [orderId], references: [id])
-  currentCustomer   Customer?     @relation(fields: [currentCustomerId], references: [id])
-  product           GasProduct?   @relation(fields: [productId], references: [id])
-  logs              CylinderLog[]
+  id                 String              @id @default(cuid())
+  cylinderNo         String              @unique
+  qrCode             String              @unique
+  cylinderCode       String?
+  status             String
+  currentCustomerId  String?
+  orderId            String?
+  productId          String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  refillBatchId      String?
+  refillBatch        RefillBatch?        @relation(fields: [refillBatchId], references: [id])
+  order              Order?              @relation(fields: [orderId], references: [id])
+  currentCustomer    Customer?           @relation(fields: [currentCustomerId], references: [id])
+  product            GasProduct?         @relation(fields: [productId], references: [id])
+  logs               CylinderLog[]
+  returnReceiptItems ReturnReceiptItem[]
 }
 
 model RefillBatch {
@@ -108,22 +111,57 @@ model DeliveryJob {
 }
 
 model GasProduct {
-  id          String       @id @default(cuid())
-  name        String
-  sizeKg      Float
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  cylinders   Cylinder[]
-  orderItems  OrderItem[]
+  id         String      @id @default(cuid())
+  name       String
+  sizeKg     Float
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  cylinders  Cylinder[]
+  orderItems OrderItem[]
 }
 
 model OrderItem {
-  id          String     @id @default(cuid())
-  orderId     String
-  productId   String
-  quantity    Int
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  order       Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product     GasProduct @relation(fields: [productId], references: [id])
+  id        String     @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  order     Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   GasProduct @relation(fields: [productId], references: [id])
+}
+
+model ReturnReceipt {
+  id         String   @id @default(cuid())
+  receiptNo  String   @unique
+  customerId String
+  driverId   String?
+  createdAt  DateTime @default(now())
+
+  customer Customer            @relation(fields: [customerId], references: [id])
+  driver   User?               @relation(fields: [driverId], references: [id])
+  items    ReturnReceiptItem[]
+}
+
+model ReturnReceiptItem {
+  id              String @id @default(cuid())
+  returnReceiptId String
+  cylinderId      String
+
+  returnReceipt ReturnReceipt @relation(fields: [returnReceiptId], references: [id], onDelete: Cascade)
+  cylinder      Cylinder      @relation(fields: [cylinderId], references: [id])
+}
+
+model CompanyProfile {
+  id        String   @id @default(cuid())
+  nameEN    String
+  nameTH    String
+  addressEN String?
+  addressTH String?
+  tel1      String?
+  tel2      String?
+  fax       String?
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

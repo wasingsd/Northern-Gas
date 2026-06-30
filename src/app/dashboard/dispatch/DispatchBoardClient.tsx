@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Phone, Truck, Package } from "lucide-react";
+import { MapPin, Phone, Truck, Package, Printer } from "lucide-react";
 import { updateDispatchStatus } from "./actions";
 import { useTransition } from "react";
 
@@ -36,15 +36,17 @@ export default function DispatchBoardClient({ initialJobs }: { initialJobs: any[
                 <div key={job.id} className="bg-white p-4 rounded-lg shadow-sm border border-border relative">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-bold text-primary">{job.jobNo}</span>
-                    <a 
-                      href={`/print/orders/${job.orderId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-gray-100 text-gray-700 p-1.5 rounded hover:bg-gray-200 transition-colors"
-                      title="พิมพ์ใบส่งถัง"
-                    >
-                      🖨️
-                    </a>
+                    <div className="flex gap-1">
+                      <a 
+                        href={`/print/orders/${job.orderId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-gray-100 text-gray-700 p-1.5 rounded hover:bg-gray-200 transition-colors flex items-center justify-center"
+                        title="พิมพ์ใบส่งถัง"
+                      >
+                        <Printer className="h-4 w-4" />
+                      </a>
+                    </div>
                   </div>
                   
                   <div className="font-medium text-sm text-foreground mb-1">

@@ -1,4 +1,4 @@
-import { Plus, Search, CheckCircle2, Clock } from "lucide-react";
+import { Plus, Search, CheckCircle2, Clock, Printer } from "lucide-react";
 import Link from "next/link";
 import { markOrderAsReadyAction } from "./actions";
 import CancelOrderButton from "./CancelOrderButton";
@@ -123,9 +123,9 @@ export default async function OrdersPage() {
                           href={`/print/orders/${o.id}`} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="w-full inline-block rounded bg-gray-800 text-white text-xs py-1.5 font-medium hover:bg-gray-900 transition-colors"
+                          className="w-full flex items-center justify-center gap-1.5 rounded bg-gray-800 text-white text-xs py-1.5 font-medium hover:bg-gray-900 transition-colors"
                         >
-                          🖨️ ใบส่งถัง
+                          <Printer className="h-3.5 w-3.5" /> ใบส่งถัง
                         </a>
                       )}
                     </td>

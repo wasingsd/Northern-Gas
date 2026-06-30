@@ -2,7 +2,7 @@
 
 import { Trash2 } from "lucide-react";
 import { useTransition } from "react";
-import { deleteCylinderAction } from "../cylinders/actions"; // We'll keep the action in cylinders for now, or move it later.
+import { deleteCylinderAction } from "./actions";
 
 export default function DeleteProductButton({ id }: { id: string }) {
   const [isPending, startTransition] = useTransition();

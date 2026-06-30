@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Package, Truck, Users, LayoutDashboard, Settings, LogOut, Database, ScanBarcode, PackageCheck, Menu, X } from "lucide-react";
+import { Package, Truck, Users, LayoutDashboard, Settings, LogOut, Database, ScanBarcode, PackageCheck, Menu, X, RotateCcw } from "lucide-react";
 
 interface SidebarNavProps {
   logoutAction: () => void;
@@ -83,13 +83,12 @@ export default function SidebarNav({ logoutAction, userName, userRole, userIniti
 
         <nav className="flex-1 p-4 space-y-2 md:space-y-1 overflow-y-auto">
           <NavLink href="/dashboard" icon={LayoutDashboard}>หน้าแรก</NavLink>
-          <NavLink href="/dashboard/scanner" icon={ScanBarcode}>สแกนบาร์โค้ด</NavLink>
+          <NavLink href="/dashboard/returns" icon={RotateCcw}>รับถังคืน</NavLink>
           <NavLink href="/dashboard/orders" icon={Package}>บันทึกส่งถัง</NavLink>
           <NavLink href="/dashboard/dispatch" icon={Truck}>งานจัดส่ง</NavLink>
           <NavLink href="/dashboard/refill" icon={Package}>งานบรรจุแก๊ส</NavLink>
           <NavLink href="/dashboard/gas-products" icon={Database}>ประเภทสินค้า</NavLink>
           <NavLink href="/dashboard/products" icon={PackageCheck}>รายการถังแก๊ส</NavLink>
-          <NavLink href="/dashboard/cylinders" icon={Database}>ติดตามสถานะถังแก๊ส</NavLink>
           <NavLink href="/dashboard/customers" icon={Users}>ลูกค้า</NavLink>
           <NavLink href="/dashboard/users" icon={Users}>จัดการผู้ใช้</NavLink>
           <NavLink href="/dashboard/settings" icon={Settings}>ตั้งค่าอื่นๆ</NavLink>

@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { updateGasProductAction } from "../actions";
 
-export default async function EditGasProductPage({ params }: { params: { id: string } }) {
+export default async function EditGasProductPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const product = await prisma.gasProduct.findUnique({
     where: { id: params.id },
   });

@@ -1,15 +1,20 @@
-export default function SettingsPage() {
+import { getCompanyProfile } from "./actions";
+import CompanySettingsForm from "./CompanySettingsForm";
+
+export default async function SettingsPage() {
+  const profile = await getCompanyProfile();
+  const plainProfile = profile ? JSON.parse(JSON.stringify(profile)) : null;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-4xl">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">ตั้งค่าอื่นๆ</h2>
-          <p className="text-sm text-gray-500">จัดการข้อมูลและการตั้งค่าระบบเพิ่มเติม</p>
+          <h2 className="text-2xl font-bold text-foreground">การตั้งค่าระบบ</h2>
+          <p className="text-sm text-gray-500">จัดการข้อมูลบริษัทสำหรับการพิมพ์เอกสารใบส่งและใบรับถัง</p>
         </div>
       </div>
-      <div className="rounded-xl border border-border bg-white shadow-sm p-8 text-center text-gray-500">
-        ยังไม่มีการตั้งค่าเพิ่มเติมในขณะนี้
-      </div>
+      
+      <CompanySettingsForm initialData={plainProfile} />
     </div>
   );
 }

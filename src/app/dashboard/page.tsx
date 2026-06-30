@@ -1,8 +1,13 @@
 import { PackageOpen, CheckCircle2, Clock, AlertTriangle, Database, RefreshCw, Truck, DollarSign } from "lucide-react";
 
 import prisma from "@/lib/prisma";
+import DashboardTimeline from "./DashboardTimeline";
 
-export default async function DashboardPage() {
+export default async function DashboardPage(props: { searchParams: Promise<{ days?: string }> }) {
+  const searchParams = await props.searchParams;
+  const daysParam = parseInt(searchParams?.days || "7", 10);
+  const filterDays = isNaN(daysParam) ? 7 : daysParam;
+  
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -49,6 +54,22 @@ export default async function DashboardPage() {
   });
   
   const monthlyCylindersSold = monthlyOrders.reduce((sum, order) => sum + order.cylinders.length, 0);
+
+  // 5. Timeline Logs
+  const filterDate = new Date(now);
+  filterDate.setDate(filterDate.getDate() - filterDays);
+  
+  const logs = await prisma.cylinderLog.findMany({
+    where: {
+      createdAt: filterDays === 0 ? { gte: startOfDay } : { gte: filterDate }
+    },
+    include: { cylinder: true },
+    orderBy: { createdAt: "desc" },
+    take: 100, // Show max 100 to prevent performance issues
+  });
+
+  // Plain objects for client component
+  const plainLogs = JSON.parse(JSON.stringify(logs));
 
   return (
     <div className="space-y-6">
@@ -140,6 +161,9 @@ export default async function DashboardPage() {
           <p className="text-sm font-medium text-gray-600 mt-1">ถังอยู่กับลูกค้า (รอคืน)</p>
         </div>
       </div>
+
+      {/* Timeline Section */}
+      <DashboardTimeline logs={plainLogs} currentDays={filterDays} />
     </div>
   );
 }

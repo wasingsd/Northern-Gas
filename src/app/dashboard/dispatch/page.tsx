@@ -14,7 +14,16 @@ export default async function DispatchPage() {
     },
     include: {
       order: {
-        include: { customer: true, cylinders: true }
+        include: { 
+          customer: {
+            include: {
+              cylinders: {
+                where: { status: "WITH_CUSTOMER" }
+              }
+            }
+          }, 
+          cylinders: true 
+        }
       },
       driver: true,
     },
