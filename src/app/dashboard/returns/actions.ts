@@ -65,7 +65,7 @@ export async function processReturnReceipt(customerId: string, driverId: string 
   });
 
   revalidatePath("/dashboard/returns");
-  return { success: true, receiptId: newReceipt.id, redirectTo: "/dashboard/returns" };
+  return { success: true, receiptId: receipt.id, redirectTo: "/dashboard/returns" };
 }
 
 export async function confirmReturnReceiptAction(receiptId: string, verifiedCylinderNos: string[] = [], adminId: string | null = null) {
