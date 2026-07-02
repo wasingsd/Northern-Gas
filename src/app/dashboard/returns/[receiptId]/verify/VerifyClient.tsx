@@ -184,7 +184,7 @@ export default function VerifyClient({ receipt, customerCylinders, adminId }: an
                   </div>
                 ) : (
                   <ul className="space-y-2">
-                    {pendingDriverCylinders.map((no) => (
+                    {pendingDriverCylinders.map((no: string) => (
                       <li key={no} className="flex items-center justify-between p-3 bg-white border border-dashed border-gray-300 rounded-lg opacity-70">
                         <span className="font-medium text-gray-600">{no}</span>
                         <button 

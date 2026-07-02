@@ -49,7 +49,7 @@ export default function DeliverClient({ jobId, expectedCylinders, customer }: an
     setError("");
     
     try {
-      const result = await finishDeliveryJobAction(jobId, scannedCylinders);
+      const result = await finishDeliveryJobAction(jobId, scannedCylinders) as any;
       if (result.success) {
         // Open print window
         if (result.receiptId) {
