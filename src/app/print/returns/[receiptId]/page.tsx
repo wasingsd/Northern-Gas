@@ -70,13 +70,13 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
         margin: "0 auto",
         padding: "0px"
       }}>
-        <div style={{ textAlign: "center", fontSize: "12px", fontWeight: "bold", marginBottom: "2px", whiteSpace: "nowrap", transform: "scale(0.95)", transformOrigin: "center" }}>
+        <div style={{ textAlign: "center", fontSize: "11px", fontWeight: "bold", marginBottom: "2px" }}>
           {profile.nameEN}
         </div>
-        <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "4px", whiteSpace: "nowrap", transform: "scale(0.9)", transformOrigin: "center" }}>
+        <div style={{ textAlign: "center", fontSize: "10px", fontWeight: "bold", marginBottom: "4px" }}>
           {profile.nameTH}
         </div>
-        {profile.tel1 && <div style={{ textAlign: "center", fontSize: "12px", marginBottom: "4px" }}>โทร: {profile.tel1} {profile.tel2 ? `, ${profile.tel2}` : ''}</div>}
+        {profile.tel1 && <div style={{ textAlign: "center", fontSize: "10px", marginBottom: "4px" }}>โทร: {profile.tel1} {profile.tel2 ? `, ${profile.tel2}` : ''}</div>}
         
         <div style={{ textAlign: "center", fontWeight: "bold", marginTop: "8px" }}>CR - Cylinder Return</div>
         <div style={{ textAlign: "center" }}>ใบรับท่อแก๊สคืน (ชั่วคราว)</div>
@@ -84,8 +84,6 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         <div style={{ marginBottom: "2px" }}>วันที่: {dateStr}</div>
         <div style={{ marginBottom: "2px" }}>อ้างอิง: {receipt.receiptNo}</div>
-        <div style={{ marginBottom: "2px" }}>พนักงานรับ: {receipt.driver?.name || "ยังไม่ระบุ"}</div>
-        <div style={{ marginBottom: "2px" }}>ทะเบียนรถ: {receipt.vehicle?.registration || "-"}</div>
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         
         <div style={{ marginBottom: "2px", fontWeight: "bold" }}>ลูกค้า: {receipt.customer.name}</div>
@@ -100,12 +98,13 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
               <div style={{ fontWeight: "bold", fontSize: "13px", borderBottom: "1px dashed #ddd", marginBottom: "4px", paddingBottom: "2px" }}>
                 {productName} 
               </div>
-              {items.map((item: any, idx: number) => (
-                <div key={item.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "14px", marginBottom: "4px" }}>
-                  <div>{idx + 1}. {item.cylinder.cylinderNo}</div>
-                  <div>1 ใบ</div>
-                </div>
-              ))}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px" }}>
+                {items.map((item: any, idx: number) => (
+                  <div key={item.id} style={{ fontSize: "12px", marginBottom: "2px" }}>
+                    {idx + 1}. {item.cylinder.cylinderNo}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -113,6 +112,11 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         <div style={{ marginBottom: "2px", fontWeight: "bold" }}>รวมรับคืนทั้งหมด: {receipt.items.length} ใบ</div>
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
+        
+        <div style={{ marginTop: "12px", fontSize: "12px" }}>
+          <div style={{ marginBottom: "2px" }}>พนักงานรับ: {receipt.driver?.name || "ยังไม่ระบุ"}</div>
+          <div style={{ marginBottom: "2px" }}>ทะเบียนรถ: {receipt.vehicle?.registration || "-"}</div>
+        </div>
         
         <div style={{ marginTop: "20px", textAlign: "center" }}>
           <div>ลงชื่อลูกค้า (ผู้ส่งคืน)</div>

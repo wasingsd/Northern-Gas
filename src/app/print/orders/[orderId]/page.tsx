@@ -68,13 +68,13 @@ export default async function PrintOrderPage(props: { params: Promise<{ orderId:
         margin: "0 auto",
         padding: "0px"
       }}>
-        <div style={{ textAlign: "center", fontSize: "12px", fontWeight: "bold", marginBottom: "2px", whiteSpace: "nowrap", transform: "scale(0.95)", transformOrigin: "center" }}>
+        <div style={{ textAlign: "center", fontSize: "11px", fontWeight: "bold", marginBottom: "2px" }}>
           {profile.nameEN}
         </div>
-        <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "4px", whiteSpace: "nowrap", transform: "scale(0.9)", transformOrigin: "center" }}>
+        <div style={{ textAlign: "center", fontSize: "10px", fontWeight: "bold", marginBottom: "4px" }}>
           {profile.nameTH}
         </div>
-        {profile.tel1 && <div style={{ textAlign: "center", fontSize: "12px", marginBottom: "4px" }}>โทร: {profile.tel1} {profile.tel2 ? `, ${profile.tel2}` : ''}</div>}
+        {profile.tel1 && <div style={{ textAlign: "center", fontSize: "10px", marginBottom: "4px" }}>โทร: {profile.tel1} {profile.tel2 ? `, ${profile.tel2}` : ''}</div>}
         
         <div style={{ textAlign: "center", fontWeight: "bold", marginTop: "8px" }}>CD - Cylinder Delivery</div>
         <div style={{ textAlign: "center" }}>ใบส่งท่อแก๊ส</div>
@@ -82,13 +82,16 @@ export default async function PrintOrderPage(props: { params: Promise<{ orderId:
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0", marginTop: "12px" }}></div>
         <div style={{ marginBottom: "2px" }}>วันที่: {dateStr}</div>
         <div style={{ marginBottom: "2px" }}>เลขที่: {order.orderNo}</div>
+        {order.invoiceNo && (
+          <div style={{ marginBottom: "2px" }}>อ้างอิง: {order.invoiceNo}</div>
+        )}
         <div style={{ marginBottom: "2px" }}>DS: {order.deliveryJob?.jobNo || "-"}</div>
-        <div style={{ marginBottom: "2px" }}>พนักงานส่ง 1: {order.deliveryJob?.driver1?.name || "ยังไม่ระบุ"}</div>
-        <div style={{ marginBottom: "2px" }}>พนักงานส่ง 2: {order.deliveryJob?.driver2?.name || "ยังไม่ระบุ"}</div>
-        <div style={{ marginBottom: "2px" }}>ทะเบียนรถ: {order.deliveryJob?.vehicle?.registration || "-"}</div>
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         
-        <div style={{ marginBottom: "2px", fontWeight: "bold" }}>ผู้รับ: {order.customer.name}</div>
+        <div style={{ marginBottom: "2px", fontWeight: "bold" }}>ลูกค้า: {order.customer.name}</div>
+        {order.deliveryJob?.address && order.deliveryJob.address !== "รับที่ร้าน" && (
+          <div style={{ marginBottom: "2px", fontSize: "13px" }}>จุดส่ง: {order.deliveryJob.address}</div>
+        )}
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         
         <div style={{ textAlign: "center", fontWeight: "bold" }}>รายการสินค้า</div>
@@ -100,20 +103,26 @@ export default async function PrintOrderPage(props: { params: Promise<{ orderId:
               <div style={{ fontWeight: "bold", fontSize: "13px", borderBottom: "1px dashed #ddd", marginBottom: "4px", paddingBottom: "2px" }}>
                 {productName} 
               </div>
-              {cyls.map((c: any, i: number) => (
-                <div key={c.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", marginBottom: "4px" }}>
-                  <div>{i + 1}. {c.cylinderNo}</div>
-                  <div>1 ใบ</div>
-                </div>
-              ))}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px" }}>
+                {cyls.map((c: any, i: number) => (
+                  <div key={c.id} style={{ fontSize: "12px", marginBottom: "2px" }}>
+                    {i + 1}. {c.cylinderNo}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
         
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         <div style={{ marginBottom: "2px", fontWeight: "bold" }}>รวมบาร์โค้ดทั้งหมด: {order.cylinders.length} บาร์โค้ด</div>
-        <div style={{ marginBottom: "2px", fontWeight: "bold" }}>แยกตาม UOM: CYL = {order.cylinders.length}</div>
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
+        
+        <div style={{ marginTop: "12px", fontSize: "12px" }}>
+          <div style={{ marginBottom: "2px" }}>พนักงานส่ง 1: {order.deliveryJob?.driver1?.name || "ยังไม่ระบุ"}</div>
+          <div style={{ marginBottom: "2px" }}>พนักงานส่ง 2: {order.deliveryJob?.driver2?.name || "ยังไม่ระบุ"}</div>
+          <div style={{ marginBottom: "2px" }}>ทะเบียนรถ: {order.deliveryJob?.vehicle?.registration || "-"}</div>
+        </div>
         
         <div style={{ marginTop: "20px", textAlign: "center" }}>
           <div>ลงชื่อผู้รับสินค้า</div>

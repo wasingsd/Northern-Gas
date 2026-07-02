@@ -8,7 +8,7 @@ type Customer = {
   customerCode: string | null;
 };
 
-export default function CustomerSection({ customers, initialData }: { customers: Customer[], initialData?: Customer }) {
+export default function CustomerSection({ customers, initialData, defaultInvoiceNo }: { customers: Customer[], initialData?: Customer, defaultInvoiceNo?: string }) {
   const [query, setQuery] = useState(initialData?.name || "");
   const [showDropdown, setShowDropdown] = useState(false);
   
@@ -81,6 +81,20 @@ export default function CustomerSection({ customers, initialData }: { customers:
               </ul>
             )}
           </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 mt-4">
+        <div className="text-gray-700 font-medium md:w-48">เลขที่ Invoice <span className="text-red-500">*</span></div>
+        <div className="flex-1">
+          <input 
+            type="text" 
+            name="invoiceNo"
+            defaultValue={defaultInvoiceNo || ""}
+            required
+            placeholder="เช่น INV-2023001" 
+            className="w-full rounded-lg border border-border px-4 py-3 text-base md:text-sm md:py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+          />
         </div>
       </div>
 

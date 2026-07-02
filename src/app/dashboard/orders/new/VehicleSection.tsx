@@ -13,13 +13,15 @@ export default function VehicleSection({
   drivers,
   defaultVehicleId,
   defaultDriver1Id,
-  defaultDriver2Id
+  defaultDriver2Id,
+  defaultAddress
 }: { 
   vehicles: Vehicle[], 
   drivers: { id: string, name: string }[],
   defaultVehicleId?: string,
   defaultDriver1Id?: string,
-  defaultDriver2Id?: string
+  defaultDriver2Id?: string,
+  defaultAddress?: string
 }) {
   return (
     <div className="p-6 border-b border-border">
@@ -83,6 +85,21 @@ export default function VehicleSection({
           </select>
         </div>
       </div>
+      
+      <div className="mt-4 max-w-3xl">
+        <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+          จุดส่ง (ถ้ามี)
+        </label>
+        <input 
+          type="text" 
+          id="address"
+          name="address"
+          defaultValue={defaultAddress || ""}
+          placeholder="ระบุสถานที่จัดส่งหรือจุดสังเกต..." 
+          className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
+        />
+      </div>
+
       <p className="text-xs text-gray-500 mt-2">
         บังคับเลือกพนักงานส่งถัง 2 คน เพื่อระบุในใบส่งถัง
       </p>

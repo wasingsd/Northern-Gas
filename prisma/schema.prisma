@@ -78,6 +78,7 @@ model Order {
   id          String       @id @default(cuid())
   orderNo     String       @unique
   customerId  String
+  invoiceNo   String?
   status      String       @default("PENDING")
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt

@@ -75,7 +75,7 @@ export default async function EditOrderPage({ params }: { params: Promise<{ orde
 
       <div className="rounded-xl border border-border bg-white shadow-sm overflow-hidden">
         <OrderFormClient action={updateActionWithId}>
-          <CustomerSection customers={customers} initialData={order.customer} />
+          <CustomerSection customers={customers} initialData={order.customer} defaultInvoiceNo={order.invoiceNo || ""} />
           
           <VehicleSection 
             vehicles={vehicles} 
@@ -83,6 +83,7 @@ export default async function EditOrderPage({ params }: { params: Promise<{ orde
             defaultVehicleId={order.deliveryJob?.vehicleId || ""} 
             defaultDriver1Id={order.deliveryJob?.driver1Id || ""}
             defaultDriver2Id={order.deliveryJob?.driver2Id || ""}
+            defaultAddress={order.deliveryJob?.address || ""}
           />
           
           <OrderItemsForm cylinders={allCylinders} initialItems={orderCylinders} />

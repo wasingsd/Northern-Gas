@@ -11,6 +11,8 @@ export async function createOrderAction(formData: FormData) {
   const vehicleId = formData.get("vehicleId") as string;
   const driver1Id = formData.get("driver1Id") as string;
   const driver2Id = formData.get("driver2Id") as string;
+  const invoiceNo = formData.get("invoiceNo") as string;
+  const address = formData.get("address") as string;
   
   const cylinderIdsJson = formData.get("cylinderIds") as string;
   let cylinderIds: string[] = [];
@@ -101,12 +103,13 @@ export async function createOrderAction(formData: FormData) {
     data: {
       orderNo,
       customerId: customer.id,
+      invoiceNo: invoiceNo || null,
       status: "PENDING",
       deliveryJob: {
         create: {
           jobNo,
           status: "WAITING",
-          address: "รับที่ร้าน",
+          address: address || "รับที่ร้าน",
           ...(vehicleId ? { vehicleId } : {}),
           ...(driver1Id ? { driver1Id } : {}),
           ...(driver2Id ? { driver2Id } : {})
@@ -149,6 +152,8 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
   const vehicleId = formData.get("vehicleId") as string;
   const driver1Id = formData.get("driver1Id") as string;
   const driver2Id = formData.get("driver2Id") as string;
+  const invoiceNo = formData.get("invoiceNo") as string;
+  const address = formData.get("address") as string;
   
   const cylinderIdsJson = formData.get("cylinderIds") as string;
   let cylinderIds: string[] = [];
@@ -180,6 +185,13 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
     data: customerDataToUpdate
   });
 
+  await prisma.order.update({
+    where: { id: order.id },
+    data: {
+      invoiceNo: invoiceNo || null,
+    }
+  });
+
   const deliveryJob = await prisma.deliveryJob.findUnique({ where: { orderId: order.id } });
   if (deliveryJob) {
     await prisma.deliveryJob.update({
@@ -187,7 +199,8 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
       data: { 
         vehicleId: vehicleId || null,
         driver1Id: driver1Id || null,
-        driver2Id: driver2Id || null
+        driver2Id: driver2Id || null,
+        address: address || "รับที่ร้าน"
       }
     });
   }
