@@ -58,7 +58,7 @@ export async function createRefillBatchAction(cylinderIds: string[]) {
 
   revalidatePath("/dashboard/refill");
   revalidatePath("/dashboard/cylinders");
-  redirect("/dashboard/refill");
+  return { success: true, redirectTo: "/dashboard/refill" };
 }
 
 // Receive back a batch from the plant

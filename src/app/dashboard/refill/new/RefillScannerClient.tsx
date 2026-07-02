@@ -11,6 +11,7 @@ export default function RefillScannerClient({ emptyCylinders = [] }: { emptyCyli
   const [scannedIds, setScannedIds] = useState<string[]>([]);
   const [unexpectedCylinders, setUnexpectedCylinders] = useState<any[]>([]); // For cylinders not in emptyCylinders but returned by server
   const [isProcessing, setIsProcessing] = useState(false);
+  const [successModal, setSuccessModal] = useState({ show: false, redirectTo: "" });
   const router = useRouter();
   
   const inputRef = useRef<HTMLInputElement>(null);
@@ -74,9 +75,14 @@ export default function RefillScannerClient({ emptyCylinders = [] }: { emptyCyli
     if (scannedIds.length === 0) return;
     setIsSubmitting(true);
     try {
-      await createRefillBatchAction(scannedIds);
+      const result = await createRefillBatchAction(scannedIds) as any;
+      if (result && result.success) {
+        setSuccessModal({ show: true, redirectTo: result.redirectTo || "/dashboard/refill" });
+      } else {
+        throw new Error("Failed");
+      }
     } catch (e) {
-      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+      alert("เกิดข้อผิดพลาด ไม่สามารถบันทึกข้อมูลได้");
       setIsSubmitting(false);
     }
   };
@@ -230,6 +236,28 @@ export default function RefillScannerClient({ emptyCylinders = [] }: { emptyCyli
         </div>
       </div>
 
+      {/* Success Modal */}
+      {successModal.show && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100]">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center animate-in fade-in zoom-in duration-200 mx-4">
+            <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-green-100 mb-4">
+              <CheckCircle2 className="h-8 w-8 text-green-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">บันทึกสำเร็จ!</h3>
+            <p className="text-sm text-gray-500 mb-6">สร้างรอบส่งบรรจุแก๊สเรียบร้อยแล้ว</p>
+            <button
+              type="button"
+              onClick={() => {
+                setSuccessModal({ show: false, redirectTo: "" });
+                router.push(successModal.redirectTo);
+              }}
+              className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2.5 rounded-lg transition-colors"
+            >
+              ตกลง
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
