@@ -1,19 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { saveCompanyProfile } from "./actions";
+import { addCompanyProfile, updateCompanyProfile } from "./company/actions";
 import { Building2, Save } from "lucide-react";
 
 export default function CompanySettingsForm({ initialData }: { initialData: any }) {
   const [formData, setFormData] = useState({
-    nameEN: initialData?.nameEN || "NORTHERN INDUSTRIAL GAS CO.,LTD",
-    nameTH: initialData?.nameTH || "บริษัท นอร์ทเธิร์น อินดัสเตรียลแก๊ส จำกัด",
-    addressEN: initialData?.addressEN || "335 Moo.10 Tambol U-Mong, Amphur Muang, Lamphun",
-    addressTH: initialData?.addressTH || "335 หมู่ 10, ต.อุโมงค์,  อ.เมืองลำพูน จังหวัดลำพูน 51150",
-    tel1: initialData?.tel1 || "053-091234-5",
-    tel2: initialData?.tel2 || "065-9983497",
-    fax: initialData?.fax || "053-091236",
-    email: initialData?.email || "northgas335@gmail.com",
+    nameEN: initialData?.nameEN || "",
+    nameTH: initialData?.nameTH || "",
+    addressEN: initialData?.addressEN || "",
+    addressTH: initialData?.addressTH || "",
+    tel1: initialData?.tel1 || "",
+    tel2: initialData?.tel2 || "",
+    fax: initialData?.fax || "",
+    email: initialData?.email || "",
   });
   
   const [isSaving, setIsSaving] = useState(false);
@@ -30,7 +30,11 @@ export default function CompanySettingsForm({ initialData }: { initialData: any 
     setMessage("");
     
     try {
-      await saveCompanyProfile(formData);
+      if (initialData?.id) {
+        await updateCompanyProfile(initialData.id, formData);
+      } else {
+        await addCompanyProfile(formData);
+      }
       setMessage("บันทึกข้อมูลเรียบร้อยแล้ว ข้อมูลจะถูกนำไปแสดงในใบเสร็จ");
       setTimeout(() => setMessage(""), 5000);
     } catch (error) {

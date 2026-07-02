@@ -13,6 +13,7 @@ export async function createOrderAction(formData: FormData) {
   const driver2Id = formData.get("driver2Id") as string;
   const invoiceNo = formData.get("invoiceNo") as string;
   const address = formData.get("address") as string;
+  const companyProfileId = formData.get("companyProfileId") as string;
   
   const cylinderIdsJson = formData.get("cylinderIds") as string;
   let cylinderIds: string[] = [];
@@ -103,6 +104,7 @@ export async function createOrderAction(formData: FormData) {
     data: {
       orderNo,
       customerId: customer.id,
+      companyProfileId: companyProfileId || null,
       invoiceNo: invoiceNo || null,
       status: "PENDING",
       deliveryJob: {

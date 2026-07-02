@@ -67,7 +67,7 @@ export async function processReturnReceipt(customerId: string, driverId: string 
   redirect("/dashboard/returns");
 }
 
-export async function confirmReturnReceiptAction(receiptId: string) {
+export async function confirmReturnReceiptAction(receiptId: string, verifiedCylinderNos: string[] = [], adminId: string | null = null) {
   const receipt = await prisma.returnReceipt.findUnique({
     where: { id: receiptId },
     include: { items: { include: { cylinder: true } } }
@@ -76,17 +76,58 @@ export async function confirmReturnReceiptAction(receiptId: string) {
   if (!receipt) throw new Error("ไม่พบรายการรับคืน");
   if (receipt.status === "COMPLETED") throw new Error("รายการนี้ถูกอนุมัติไปแล้ว");
 
-  await prisma.$transaction(async (tx) => {
-    // 1. Update receipt status
-    await tx.returnReceipt.update({
-      where: { id: receiptId },
-      data: { status: "COMPLETED" }
+  // Get all cylinder records for the verified ones
+  let verifiedCylinders = [];
+  if (verifiedCylinderNos.length > 0) {
+    verifiedCylinders = await prisma.cylinder.findMany({
+      where: { cylinderNo: { in: verifiedCylinderNos } }
     });
+  } else {
+    // Fallback if they didn't pass array (e.g. from old cancel button if needed)
+    verifiedCylinders = receipt.items.map(i => i.cylinder);
+  }
 
-    // 2. Update cylinders to RECEIVED_EMPTY and remove from customer
-    for (const item of receipt.items) {
+  await prisma.$transaction(async (tx) => {
+    // 1. Revert missing cylinders (in original receipt, but NOT in verified list)
+    const verifiedIds = verifiedCylinders.map(c => c.id);
+    const missingItems = receipt.items.filter(item => !verifiedIds.includes(item.cylinderId));
+    
+    for (const item of missingItems) {
+      // Revert status to WITH_CUSTOMER
       await tx.cylinder.update({
         where: { id: item.cylinderId },
+        data: { status: "WITH_CUSTOMER" }
+      });
+      await tx.cylinderLog.create({
+        data: {
+          cylinderId: item.cylinderId,
+          status: "WITH_CUSTOMER",
+          notes: `ลบออกจากรายการรับคืน (${receipt.receiptNo})`
+        }
+      });
+      // Remove from receipt items
+      await tx.returnReceiptItem.delete({
+        where: { id: item.id }
+      });
+    }
+
+    // 2. Add extra cylinders (in verified list, but NOT in original receipt)
+    const originalIds = receipt.items.map(i => i.cylinderId);
+    const extraCylinders = verifiedCylinders.filter(c => !originalIds.includes(c.id));
+    
+    for (const c of extraCylinders) {
+      await tx.returnReceiptItem.create({
+        data: {
+          returnReceiptId: receipt.id,
+          cylinderId: c.id
+        }
+      });
+    }
+
+    // 3. Update all verified cylinders to RECEIVED_EMPTY
+    for (const c of verifiedCylinders) {
+      await tx.cylinder.update({
+        where: { id: c.id },
         data: {
           status: "RECEIVED_EMPTY",
           currentCustomerId: null,
@@ -96,12 +137,21 @@ export async function confirmReturnReceiptAction(receiptId: string) {
 
       await tx.cylinderLog.create({
         data: {
-          cylinderId: item.cylinderId,
+          cylinderId: c.id,
           status: "RECEIVED_EMPTY",
           notes: `อนุมัติรับคืนเข้าคลัง (ใบรับ: ${receipt.receiptNo})`
         }
       });
     }
+
+    // 4. Update receipt status and approvedBy
+    await tx.returnReceipt.update({
+      where: { id: receiptId },
+      data: { 
+        status: "COMPLETED",
+        ...(adminId ? { approvedById: adminId } : {})
+      }
+    });
   });
 
   revalidatePath("/dashboard/returns");

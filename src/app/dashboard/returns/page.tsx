@@ -2,9 +2,27 @@ import { Plus, Search, CheckCircle2, Clock, Printer } from "lucide-react";
 import Link from "next/link";
 import ReturnActionButtons from "./ReturnActionButtons";
 
+import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 
 export default async function ReturnsListPage() {
+  const supabase = await createClient();
+  const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+  
+  let userRole = "DRIVER";
+  if (supabaseUser) {
+    const dbUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { supabaseId: supabaseUser.id },
+          { email: supabaseUser.email ?? "" },
+        ],
+      },
+      select: { role: true },
+    });
+    if (dbUser) userRole = dbUser.role;
+  }
+
   const receipts = await prisma.returnReceipt.findMany({
     include: {
       customer: true,
@@ -85,8 +103,8 @@ export default async function ReturnsListPage() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex flex-col items-center gap-2">
-                        {r.status === "PENDING" && <ReturnActionButtons receiptId={r.id} />}
-                        {r.status === "COMPLETED" && (
+                        {r.status === "PENDING" && <ReturnActionButtons receiptId={r.id} userRole={userRole} />}
+                        {r.status === "COMPLETED" && userRole !== "DRIVER" && (
                           <a href={`/print/returns/${r.id}`} target="_blank" rel="noopener noreferrer"
                             className="w-full flex items-center justify-center gap-1.5 rounded bg-gray-800 text-white text-xs py-1.5 font-medium hover:bg-gray-900 transition-colors">
                             <Printer className="h-3.5 w-3.5" /> พิมพ์ใบรับคืน
@@ -131,8 +149,8 @@ export default async function ReturnsListPage() {
                   <span className="text-xs text-gray-500">{new Date(r.createdAt).toLocaleString("th-TH", { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
                 <div className="pt-0.5">
-                  {r.status === "PENDING" && <ReturnActionButtons receiptId={r.id} />}
-                  {r.status === "COMPLETED" && (
+                  {r.status === "PENDING" && <ReturnActionButtons receiptId={r.id} userRole={userRole} />}
+                  {r.status === "COMPLETED" && userRole !== "DRIVER" && (
                     <a href={`/print/returns/${r.id}`} target="_blank" rel="noopener noreferrer"
                       className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-gray-800 text-white text-sm py-2.5 font-medium hover:bg-gray-900 transition-colors">
                       <Printer className="h-4 w-4" /> พิมพ์ใบรับคืน

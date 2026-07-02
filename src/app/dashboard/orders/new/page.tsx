@@ -4,6 +4,7 @@ import { createOrderAction } from "../actions";
 import OrderItemsForm from "./OrderItemsForm";
 import CustomerSection from "./CustomerSection";
 import VehicleSection from "./VehicleSection";
+import CompanySection from "./CompanySection";
 import OrderFormClient from "./OrderFormClient";
 
 import prisma from "@/lib/prisma";
@@ -17,6 +18,7 @@ export default async function NewOrderPage() {
       status: { not: "WITH_CUSTOMER" }
     }
   });
+  const companyProfiles = await prisma.companyProfile.findMany({ orderBy: { createdAt: "asc" } });
   const vehicles = await prisma.vehicle.findMany({ orderBy: { registration: "asc" } });
   const drivers = await prisma.user.findMany({ 
     select: { id: true, name: true },
@@ -37,6 +39,8 @@ export default async function NewOrderPage() {
 
       <div className="rounded-xl border border-border bg-white shadow-sm overflow-hidden">
         <OrderFormClient action={createOrderAction}>
+          <CompanySection companyProfiles={companyProfiles} />
+
           <CustomerSection customers={customers} />
           
           <VehicleSection vehicles={vehicles} drivers={drivers} />

@@ -43,6 +43,7 @@ export default async function DispatchPage(props: { searchParams?: Promise<{ [ke
       },
       driver1: true,
       driver2: true,
+      receipt: true,
     },
     orderBy: { createdAt: "asc" }
   });

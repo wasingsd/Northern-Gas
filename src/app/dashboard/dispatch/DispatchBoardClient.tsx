@@ -3,6 +3,7 @@
 import { MapPin, Phone, Truck, Package, Printer, Loader2 } from "lucide-react";
 import { updateDispatchStatus } from "./actions";
 import { useTransition } from "react";
+import Link from "next/link";
 
 export default function DispatchBoardClient({ initialJobs }: { initialJobs: any[] }) {
   const [isPending, startTransition] = useTransition();
@@ -36,17 +37,6 @@ export default function DispatchBoardClient({ initialJobs }: { initialJobs: any[
                 <div key={job.id} className="bg-white p-4 rounded-lg shadow-sm border border-border relative">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-bold text-primary">{job.jobNo}</span>
-                    <div className="flex gap-1">
-                      <a 
-                        href={`/print/orders/${job.orderId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-gray-100 text-gray-700 p-1.5 rounded hover:bg-gray-200 transition-colors flex items-center justify-center"
-                        title="พิมพ์ใบส่งถัง"
-                      >
-                        <Printer className="h-4 w-4" />
-                      </a>
-                    </div>
                   </div>
                   
                   <div className="font-medium text-sm text-foreground mb-1">
@@ -85,18 +75,25 @@ export default function DispatchBoardClient({ initialJobs }: { initialJobs: any[
                        </button>
                     )}
                     {col.id === "OUT_FOR_DELIVERY" && (
-                       <button 
-                         onClick={() => handleStatusChange(job.id, "DELIVERED")}
-                         disabled={isPending}
-                         className="w-full bg-green-600 text-white text-sm font-medium py-2.5 rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-1 transition-colors"
+                       <Link 
+                         href={`/dashboard/dispatch/${job.id}/deliver`}
+                         className="w-full bg-green-600 text-white text-sm font-medium py-2.5 rounded-lg hover:bg-green-700 flex items-center justify-center gap-1 transition-colors"
                        >
-                         {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />}
-                         {isPending ? "กำลังบันทึก..." : "บันทึกส่งสำเร็จ"}
-                       </button>
+                         <Package className="h-4 w-4" />
+                         ตรวจสอบและจัดส่ง
+                       </Link>
                     )}
-                    {col.id === "DELIVERED" && (
+                    {col.id === "DELIVERED" && job.receipt && (
+                       <a 
+                         href={`/print/dispatch/${job.receipt.id}`} target="_blank" rel="noopener noreferrer"
+                         className="w-full bg-gray-800 text-white text-sm font-medium py-2.5 rounded-lg hover:bg-gray-900 flex items-center justify-center gap-1 transition-colors"
+                       >
+                         <Printer className="h-4 w-4" /> พิมพ์ใบจัดส่ง
+                       </a>
+                    )}
+                    {col.id === "DELIVERED" && !job.receipt && (
                        <span className="w-full text-center text-xs text-green-700 font-medium py-1.5 flex items-center justify-center gap-1">
-                         เรียบร้อยแล้ว
+                         เรียบร้อยแล้ว (ไม่มีใบส่ง)
                        </span>
                     )}
                   </div>

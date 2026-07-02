@@ -53,15 +53,20 @@ export default function ReturnsClient({ customers, withCustomerCylinders = [], c
 
   const handleAddCylinder = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!cylinderInput.trim()) return;
+    const input = cylinderInput.trim();
+    if (!input) return;
+    
+    // Match against ALL withCustomerCylinders to resolve qrCode to cylinderNo
+    const matched = withCustomerCylinders.find((c: any) => c.cylinderNo === input || c.qrCode === input);
+    const normalizedInput = matched ? matched.cylinderNo : input;
     
     // Check if already scanned
-    if (scannedCylinders.includes(cylinderInput.trim())) {
+    if (scannedCylinders.includes(normalizedInput)) {
       setError("หมายเลขถังนี้ถูกสแกนแล้ว");
       return;
     }
 
-    setScannedCylinders([...scannedCylinders, cylinderInput.trim()]);
+    setScannedCylinders([...scannedCylinders, normalizedInput]);
     setCylinderInput("");
     setError("");
   };

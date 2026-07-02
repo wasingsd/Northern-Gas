@@ -1,6 +1,7 @@
+import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 import PrintTrigger from "../../orders/[orderId]/PrintTrigger";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function PrintReturnReceiptPage(props: { params: Promise<{ receiptId: string }> }) {
   const params = await props.params;
@@ -12,6 +13,7 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
       customer: true,
       driver: true,
       vehicle: true,
+      approvedBy: true,
       items: {
         include: {
           cylinder: {
@@ -24,6 +26,26 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
 
   if (!receipt) {
     return notFound();
+  }
+
+  const supabase = await createClient();
+  const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+  
+  if (supabaseUser) {
+    const dbUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { supabaseId: supabaseUser.id },
+          { email: supabaseUser.email ?? "" },
+        ],
+      },
+      select: { role: true },
+    });
+    
+    if (dbUser?.role === "DRIVER" && receipt.status === "COMPLETED") {
+      // Drivers cannot print completed receipts
+      redirect("/dashboard/returns");
+    }
   }
 
   // Group items by cylinder product name
@@ -79,7 +101,7 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
         {profile.tel1 && <div style={{ textAlign: "center", fontSize: "10px", marginBottom: "4px" }}>โทร: {profile.tel1} {profile.tel2 ? `, ${profile.tel2}` : ''}</div>}
         
         <div style={{ textAlign: "center", fontWeight: "bold", marginTop: "8px" }}>CR - Cylinder Return</div>
-        <div style={{ textAlign: "center" }}>ใบรับท่อแก๊สคืน (ชั่วคราว)</div>
+        <div style={{ textAlign: "center" }}>ใบรับท่อแก๊สคืน {receipt.status === "COMPLETED" ? "(ตรวจสอบแล้ว)" : "(ชั่วคราว)"}</div>
         
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         <div style={{ marginBottom: "2px" }}>วันที่: {dateStr}</div>
@@ -116,6 +138,9 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
         <div style={{ marginTop: "12px", fontSize: "12px" }}>
           <div style={{ marginBottom: "2px" }}>พนักงานรับ: {receipt.driver?.name || "ยังไม่ระบุ"}</div>
           <div style={{ marginBottom: "2px" }}>ทะเบียนรถ: {receipt.vehicle?.registration || "-"}</div>
+          {receipt.status === "COMPLETED" && (
+            <div style={{ marginBottom: "2px", marginTop: "4px" }}>ผู้ตรวจสอบ: {receipt.approvedBy?.name || "-"}</div>
+          )}
         </div>
         
         <div style={{ marginTop: "20px", textAlign: "center" }}>

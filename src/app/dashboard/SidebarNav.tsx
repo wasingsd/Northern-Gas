@@ -20,6 +20,7 @@ export default function SidebarNav({ logoutAction, userName, userRole, userIniti
 
   const roleLabel =
     userRole === "OWNER" ? "เจ้าของร้าน" :
+    userRole === "ADMIN" ? "แอดมินร้าน" :
     userRole === "DRIVER" ? "คนขับรถ" :
     userRole;
 
@@ -82,16 +83,51 @@ export default function SidebarNav({ logoutAction, userName, userRole, userIniti
         </div>
 
         <nav className="flex-1 p-4 space-y-2 md:space-y-1 overflow-y-auto">
-          <NavLink href="/dashboard" icon={LayoutDashboard}>หน้าแรก</NavLink>
+          {/* Dashboard: OWNER, ADMIN */}
+          {["OWNER", "ADMIN"].includes(userRole) && (
+            <NavLink href="/dashboard" icon={LayoutDashboard}>หน้าแรก</NavLink>
+          )}
+
+          {/* Returns: ALL */}
           <NavLink href="/dashboard/returns" icon={RotateCcw}>รับถังคืน</NavLink>
-          <NavLink href="/dashboard/orders" icon={Package}>บันทึกส่งถัง</NavLink>
+
+          {/* Orders: OWNER, ADMIN */}
+          {["OWNER", "ADMIN"].includes(userRole) && (
+            <NavLink href="/dashboard/orders" icon={Package}>บันทึกส่งถัง</NavLink>
+          )}
+
+          {/* Dispatch: ALL */}
           <NavLink href="/dashboard/dispatch" icon={Truck}>งานจัดส่ง</NavLink>
-          <NavLink href="/dashboard/refill" icon={Package}>งานบรรจุแก๊ส</NavLink>
-          <NavLink href="/dashboard/gas-products" icon={Database}>ประเภทสินค้า</NavLink>
-          <NavLink href="/dashboard/products" icon={PackageCheck}>รายการถังแก๊ส</NavLink>
-          <NavLink href="/dashboard/customers" icon={Users}>ลูกค้า</NavLink>
-          <NavLink href="/dashboard/users" icon={Users}>จัดการผู้ใช้</NavLink>
-          <NavLink href="/dashboard/settings" icon={Settings}>ตั้งค่าอื่นๆ</NavLink>
+
+          {/* Refill: OWNER, ADMIN */}
+          {["OWNER", "ADMIN"].includes(userRole) && (
+            <NavLink href="/dashboard/refill" icon={Package}>งานบรรจุแก๊ส</NavLink>
+          )}
+
+          {/* Gas Products: OWNER */}
+          {["OWNER"].includes(userRole) && (
+            <NavLink href="/dashboard/gas-products" icon={Database}>ประเภทสินค้า</NavLink>
+          )}
+
+          {/* Cylinders: OWNER, ADMIN */}
+          {["OWNER", "ADMIN"].includes(userRole) && (
+            <NavLink href="/dashboard/products" icon={PackageCheck}>รายการถังแก๊ส</NavLink>
+          )}
+
+          {/* Customers: OWNER, ADMIN */}
+          {["OWNER", "ADMIN"].includes(userRole) && (
+            <NavLink href="/dashboard/customers" icon={Users}>ลูกค้า</NavLink>
+          )}
+
+          {/* Users: OWNER */}
+          {["OWNER"].includes(userRole) && (
+            <NavLink href="/dashboard/users" icon={Users}>จัดการผู้ใช้</NavLink>
+          )}
+
+          {/* Settings: OWNER */}
+          {["OWNER"].includes(userRole) && (
+            <NavLink href="/dashboard/settings" icon={Settings}>ตั้งค่าอื่นๆ</NavLink>
+          )}
         </nav>
 
         {/* User info + Logout */}

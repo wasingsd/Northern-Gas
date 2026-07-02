@@ -58,7 +58,7 @@ export default async function DashboardLayout({
           <div className="ml-auto flex items-center gap-3">
             <div className="text-right">
               <p className="text-sm font-medium text-foreground">{userName}</p>
-              <p className="text-xs text-gray-500">{userRole === "OWNER" ? "เจ้าของร้าน" : userRole === "DRIVER" ? "คนขับรถ" : userRole}</p>
+              <p className="text-xs text-gray-500">{userRole === "OWNER" ? "เจ้าของร้าน" : userRole === "ADMIN" ? "แอดมินร้าน" : userRole === "DRIVER" ? "คนขับรถ" : userRole}</p>
             </div>
             <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
               {userInitial}

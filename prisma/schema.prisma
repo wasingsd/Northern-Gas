@@ -19,7 +19,9 @@ model User {
   updatedAt             DateTime        @updatedAt
   deliveryJobsAsDriver1 DeliveryJob[]   @relation("Driver1")
   deliveryJobsAsDriver2 DeliveryJob[]   @relation("Driver2")
-  returnReceipts        ReturnReceipt[]
+  returnReceipts        ReturnReceipt[] @relation("DriverReturns")
+  approvedReturns       ReturnReceipt[] @relation("ApprovedReturns")
+  deliveryReceipts      DeliveryReceipt[] @relation("DeliveredBy")
 }
 
 model Customer {
@@ -52,6 +54,7 @@ model Cylinder {
   owner              CylinderOwner?      @relation(fields: [ownerId], references: [id])
   logs               CylinderLog[]
   returnReceiptItems ReturnReceiptItem[]
+  deliveryReceiptItems DeliveryReceiptItem[]
 }
 
 model RefillBatch {
@@ -82,10 +85,12 @@ model Order {
   status      String       @default("PENDING")
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  cylinders   Cylinder[]
-  items       OrderItem[]
-  deliveryJob DeliveryJob?
-  customer    Customer     @relation(fields: [customerId], references: [id])
+  cylinders        Cylinder[]
+  items            OrderItem[]
+  deliveryJob      DeliveryJob?
+  customer         Customer        @relation(fields: [customerId], references: [id])
+  companyProfileId String?
+  companyProfile   CompanyProfile? @relation(fields: [companyProfileId], references: [id])
 }
 
 model DeliveryJob {
@@ -104,6 +109,7 @@ model DeliveryJob {
   vehicleId   String?
   vehicle     Vehicle?  @relation(fields: [vehicleId], references: [id])
   order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  receipt     DeliveryReceipt?
 }
 
 model GasProduct {
@@ -135,6 +141,30 @@ model OrderItem {
   product   GasProduct @relation(fields: [productId], references: [id])
 }
 
+model DeliveryReceipt {
+  id            String   @id @default(cuid())
+  receiptNo     String   @unique
+  deliveryJobId String   @unique
+  deliveredById String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  deliveryJob   DeliveryJob @relation(fields: [deliveryJobId], references: [id], onDelete: Cascade)
+  deliveredBy   User?       @relation("DeliveredBy", fields: [deliveredById], references: [id])
+  items         DeliveryReceiptItem[]
+}
+
+model DeliveryReceiptItem {
+  id         String   @id @default(cuid())
+  receiptId  String
+  cylinderId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  receipt    DeliveryReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  cylinder   Cylinder        @relation(fields: [cylinderId], references: [id])
+}
+
 model ReturnReceipt {
   id         String   @id @default(cuid())
   receiptNo  String   @unique
@@ -144,7 +174,9 @@ model ReturnReceipt {
   createdAt  DateTime @default(now())
 
   customer Customer            @relation(fields: [customerId], references: [id])
-  driver   User?               @relation(fields: [driverId], references: [id])
+  driver   User?               @relation("DriverReturns", fields: [driverId], references: [id])
+  approvedById String?
+  approvedBy User?             @relation("ApprovedReturns", fields: [approvedById], references: [id])
   vehicleId String?
   vehicle  Vehicle?            @relation(fields: [vehicleId], references: [id])
   items    ReturnReceiptItem[]
@@ -171,6 +203,7 @@ model CompanyProfile {
   email     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  orders    Order[]
 }
 
 model Vehicle {
