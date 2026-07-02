@@ -5,7 +5,14 @@ import ReturnActionButtons from "./ReturnActionButtons";
 import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 
-export default async function ReturnsListPage() {
+export default async function ReturnsListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const resolvedSearchParams = await searchParams;
+  const q = typeof resolvedSearchParams.q === "string" ? resolvedSearchParams.q : "";
+
   const supabase = await createClient();
   const { data: { user: supabaseUser } } = await supabase.auth.getUser();
   
@@ -24,6 +31,13 @@ export default async function ReturnsListPage() {
   }
 
   const receipts = await prisma.returnReceipt.findMany({
+    where: q ? {
+      OR: [
+        { receiptNo: { contains: q, mode: "insensitive" } },
+        { invoiceNo: { contains: q, mode: "insensitive" } },
+        { customer: { name: { contains: q, mode: "insensitive" } } }
+      ]
+    } : undefined,
     include: {
       customer: true,
       items: {
@@ -52,14 +66,16 @@ export default async function ReturnsListPage() {
 
       <div className="rounded-xl border border-border bg-white shadow-sm overflow-hidden">
         <div className="p-4 border-b border-border flex items-center gap-4">
-          <div className="relative flex-1">
+          <form method="GET" action="/dashboard/returns" className="relative flex-1">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
             <input
               type="text"
-              placeholder="ค้นหาเลขที่ใบรับ, ชื่อลูกค้า..."
+              name="q"
+              defaultValue={q}
+              placeholder="ค้นหาเลขที่ใบรับ, เลข INV, ชื่อลูกค้า... (กด Enter เพื่อค้นหา)"
               className="w-full rounded-lg border border-border pl-9 pr-4 py-2.5 text-base sm:text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
             />
-          </div>
+          </form>
         </div>
         
         {/* Desktop Table */}
@@ -84,7 +100,10 @@ export default async function ReturnsListPage() {
               ) : (
                 receipts.map((r) => (
                   <tr key={r.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-primary">{r.receiptNo}</td>
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-primary">{r.receiptNo}</div>
+                      {r.invoiceNo && <div className="text-xs text-gray-500 mt-0.5">INV: {r.invoiceNo}</div>}
+                    </td>
                     <td className="px-6 py-4">
                       <div className="font-medium text-foreground">{r.customer.name}</div>
                       <div className="text-xs text-gray-500">{new Date(r.createdAt).toLocaleString("th-TH")}</div>
@@ -129,8 +148,11 @@ export default async function ReturnsListPage() {
               <div key={r.id} className="p-4 space-y-2.5">
                 {/* Row 1: Receipt No + Quantity */}
                 <div className="flex items-center justify-between">
-                  <div className="font-bold text-primary text-base">{r.receiptNo}</div>
-                  <div className="flex items-center gap-2">
+                  <div>
+                    <div className="font-bold text-primary text-base">{r.receiptNo}</div>
+                    {r.invoiceNo && <div className="text-xs text-gray-500">INV: {r.invoiceNo}</div>}
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
                     <span className="text-sm font-semibold text-gray-700 bg-gray-100 px-2.5 py-0.5 rounded-full">{r.items.length} ถัง</span>
                     {r.status === "PENDING" && (
                       <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium bg-yellow-50 text-yellow-700">

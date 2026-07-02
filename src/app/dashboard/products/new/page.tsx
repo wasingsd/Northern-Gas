@@ -71,6 +71,18 @@ export default async function NewProductPage() {
             </div>
 
             <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">สถานะเริ่มต้น (ตอนเพิ่มเข้าระบบ) <span className="text-red-500">*</span></label>
+              <select
+                name="initialStatus"
+                required
+                className="w-full rounded-lg border border-border px-4 py-3 text-base md:text-sm md:py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors bg-white"
+              >
+                <option value="READY_TO_DISPATCH">ถังแก๊สพร้อมขาย (ถังที่เติมมาแล้ว)</option>
+                <option value="RECEIVED_EMPTY">ถังเปล่า (ยังไม่ได้เติม)</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">เจ้าของถัง <span className="text-gray-400 font-normal">(ไม่บังคับ)</span></label>
               <select
                 name="ownerId"

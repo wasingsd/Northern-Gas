@@ -10,6 +10,7 @@ export async function createCylinderAction(formData: FormData) {
   const qrCode = formData.get("qrCode") as string;
   const productId = formData.get("productId") as string;
   const ownerId = (formData.get("ownerId") as string) || null;
+  const initialStatus = (formData.get("initialStatus") as string) || "READY_TO_DISPATCH";
   const redirectTo = formData.get("redirectTo") as string || "/dashboard/products";
   
   const parsed = CylinderSchema.safeParse({ cylinderNo, qrCode, productId });
@@ -23,15 +24,15 @@ export async function createCylinderAction(formData: FormData) {
       qrCode,
       productId,
       ownerId,
-      status: "READY_TO_DISPATCH", // default status
+      status: initialStatus,
     }
   });
 
   await prisma.cylinderLog.create({
     data: {
       cylinderId: cylinder.id,
-      status: "READY_TO_DISPATCH",
-      notes: "ขึ้นทะเบียนสินค้าใหม่เข้าระบบ"
+      status: initialStatus,
+      notes: initialStatus === "READY_TO_DISPATCH" ? "ขึ้นทะเบียนสินค้าใหม่ (ถังเติมแล้ว)" : "ขึ้นทะเบียนสินค้าใหม่ (ถังเปล่า)"
     }
   });
 

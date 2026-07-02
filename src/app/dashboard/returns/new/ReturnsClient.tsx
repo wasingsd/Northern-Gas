@@ -14,6 +14,7 @@ export default function ReturnsClient({ customers, withCustomerCylinders = [], c
 
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [selectedCompanyProfileId, setSelectedCompanyProfileId] = useState("");
+  const [invoiceNo, setInvoiceNo] = useState("");
   const [cylinderInput, setCylinderInput] = useState("");
   const [scannedCylinders, setScannedCylinders] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -112,7 +113,7 @@ export default function ReturnsClient({ customers, withCustomerCylinders = [], c
     setError("");
 
     try {
-      const result = await processReturnReceipt(selectedCustomerId, currentUser?.id || null, selectedVehicleId || null, scannedCylinders, selectedCompanyProfileId || null) as any;
+      const result = await processReturnReceipt(selectedCustomerId, currentUser?.id || null, selectedVehicleId || null, scannedCylinders, selectedCompanyProfileId || null, invoiceNo || null) as any;
       if (result.success) {
         // Open print window
         if (result.receiptId) {
@@ -192,6 +193,19 @@ export default function ReturnsClient({ customers, withCustomerCylinders = [], c
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                เลขที่อ้างอิง / INV <span className="text-gray-400 font-normal">(ไม่บังคับ)</span>
+              </label>
+              <input 
+                type="text" 
+                value={invoiceNo}
+                onChange={(e) => setInvoiceNo(e.target.value)}
+                placeholder="เช่น INV-001 หรืออ้างอิงเอกสารอื่น" 
+                className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:ring-primary focus:border-primary outline-none mb-4"
+              />
             </div>
 
             <div>

@@ -183,6 +183,7 @@ model DeliveryReceiptItem {
 model ReturnReceipt {
   id         String   @id @default(cuid())
   receiptNo  String   @unique
+  invoiceNo  String?
   customerId String
   driverId   String?
   status     String   @default("PENDING")

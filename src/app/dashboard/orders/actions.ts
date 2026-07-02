@@ -149,7 +149,7 @@ export async function createOrderAction(formData: FormData) {
       data: cylinderIds.map(cId => ({
         cylinderId: cId,
         status: "READY_TO_DISPATCH",
-        notes: `บันทึกรายการส่งถัง ${orderNo}`
+        notes: `บันทึกรายการส่งถัง ${orderNo}${invoiceNo ? ` (INV: ${invoiceNo})` : ""}`
       }))
     });
 
@@ -268,7 +268,7 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
       data: cylinderIds.map(cId => ({
         cylinderId: cId,
         status: "READY_TO_DISPATCH",
-        notes: `แก้ไขรายการส่งถัง (${order.orderNo})`
+        notes: `แก้ไขรายการส่งถัง ${order.orderNo}${invoiceNo ? ` (INV: ${invoiceNo})` : ""}`
       }))
     });
   });
