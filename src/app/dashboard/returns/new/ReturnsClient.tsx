@@ -4,13 +4,14 @@ import { useState, useRef, useEffect } from "react";
 import { RotateCcw, Search, Trash2, Printer, Plus, CheckCircle2 } from "lucide-react";
 import { processReturnReceipt } from "../actions";
 
-export default function ReturnsClient({ customers, withCustomerCylinders = [], currentUser, vehicles = [] }: any) {
+export default function ReturnsClient({ customers, withCustomerCylinders = [], currentUser, vehicles = [], companyProfiles = [] }: any) {
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const [customerQuery, setCustomerQuery] = useState("");
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
+  const [selectedCompanyProfileId, setSelectedCompanyProfileId] = useState("");
   const [cylinderInput, setCylinderInput] = useState("");
   const [scannedCylinders, setScannedCylinders] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -60,6 +61,10 @@ export default function ReturnsClient({ customers, withCustomerCylinders = [], c
     const matched = withCustomerCylinders.find((c: any) => c.cylinderNo === input || c.qrCode === input);
     const normalizedInput = matched ? matched.cylinderNo : input;
     
+    if (matched && matched.order?.companyProfileId && !selectedCompanyProfileId) {
+      setSelectedCompanyProfileId(matched.order.companyProfileId);
+    }
+    
     // Check if already scanned
     if (scannedCylinders.includes(normalizedInput)) {
       setError("หมายเลขถังนี้ถูกสแกนแล้ว");
@@ -80,6 +85,13 @@ export default function ReturnsClient({ customers, withCustomerCylinders = [], c
       removeCylinder(no);
     } else {
       setScannedCylinders([...scannedCylinders, no]);
+      
+      if (!selectedCompanyProfileId) {
+        const matched = withCustomerCylinders.find((c: any) => c.cylinderNo === no);
+        if (matched && matched.order?.companyProfileId) {
+          setSelectedCompanyProfileId(matched.order.companyProfileId);
+        }
+      }
     }
   };
 
@@ -97,7 +109,7 @@ export default function ReturnsClient({ customers, withCustomerCylinders = [], c
     setError("");
 
     try {
-      await processReturnReceipt(selectedCustomerId, currentUser?.id || null, selectedVehicleId || null, scannedCylinders);
+      await processReturnReceipt(selectedCustomerId, currentUser?.id || null, selectedVehicleId || null, scannedCylinders, selectedCompanyProfileId || null);
       // It will redirect on success
     } catch (err: any) {
       setError(err.message || "เกิดข้อผิดพลาดในการบันทึกรับถัง");
@@ -150,6 +162,24 @@ export default function ReturnsClient({ customers, withCustomerCylinders = [], c
                   ))}
                 </ul>
               )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                บริษัท (หัวบิล)
+              </label>
+              <select 
+                value={selectedCompanyProfileId}
+                onChange={(e) => setSelectedCompanyProfileId(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:ring-primary focus:border-primary outline-none mb-4"
+              >
+                <option value="">-- ไม่ระบุ (ใช้ค่าดั้งเดิม) --</option>
+                {companyProfiles.map((p: any) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nameTH}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>

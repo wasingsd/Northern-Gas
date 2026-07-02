@@ -3,7 +3,8 @@ import prisma from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import VerifyClient from "./VerifyClient";
 
-export default async function VerifyReturnReceiptPage({ params }: { params: { receiptId: string } }) {
+export default async function VerifyReturnReceiptPage(props: { params: Promise<{ receiptId: string }> }) {
+  const params = await props.params;
   const supabase = await createClient();
   const { data: { user: supabaseUser } } = await supabase.auth.getUser();
   

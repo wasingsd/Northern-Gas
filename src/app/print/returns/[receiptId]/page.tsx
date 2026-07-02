@@ -11,6 +11,7 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
     where: { id: receiptId },
     include: {
       customer: true,
+      companyProfile: true,
       driver: true,
       vehicle: true,
       approvedBy: true,
@@ -58,7 +59,7 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
     return acc;
   }, {} as Record<string, typeof receipt.items>);
 
-  const profile = await prisma.companyProfile.findFirst() || {
+  const profile = receipt.companyProfile || await prisma.companyProfile.findFirst() || {
     nameEN: "NORTHERN INDUSTRIAL GAS CO.,LTD",
     nameTH: "บริษัท นอร์ทเธิร์น อินดัสเตรียลแก๊ส จำกัด",
     tel1: "053-091234-5",

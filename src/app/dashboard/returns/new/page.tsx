@@ -26,15 +26,20 @@ export default async function ReturnsPage() {
   // Fetch all cylinders currently with customers
   const withCustomerCylinders = await prisma.cylinder.findMany({
     where: { status: "WITH_CUSTOMER" },
-    include: { product: true }
+    include: { 
+      product: true,
+      order: { select: { companyProfileId: true } }
+    }
   });
 
   const vehicles = await prisma.vehicle.findMany({ orderBy: { registration: "asc" } });
+  const companyProfiles = await prisma.companyProfile.findMany({ orderBy: { createdAt: "asc" } });
 
   // Convert to plain object safely
   const plainCustomers = JSON.parse(JSON.stringify(customers));
   const plainCylinders = JSON.parse(JSON.stringify(withCustomerCylinders));
   const plainUser = user ? JSON.parse(JSON.stringify(user)) : null;
+  const plainCompanyProfiles = JSON.parse(JSON.stringify(companyProfiles));
 
   return (
     <div className="space-y-6">
@@ -45,7 +50,13 @@ export default async function ReturnsPage() {
         </div>
       </div>
       
-      <ReturnsClient customers={plainCustomers} withCustomerCylinders={plainCylinders} currentUser={plainUser} vehicles={vehicles} />
+      <ReturnsClient 
+          customers={plainCustomers} 
+          withCustomerCylinders={plainCylinders}
+          currentUser={plainUser}
+          vehicles={vehicles}
+          companyProfiles={plainCompanyProfiles}
+        />
     </div>
   );
 }
