@@ -33,9 +33,8 @@ export default function OrderFormClient({
         setSuccessModal({ show: true, redirectTo: null });
       } else {
         setErrorModal({ show: true, message: e.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล" });
+        setIsSubmitting(false);
       }
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

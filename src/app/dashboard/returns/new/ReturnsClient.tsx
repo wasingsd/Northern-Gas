@@ -3,12 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { RotateCcw, Search, Trash2, Printer, Plus, CheckCircle2 } from "lucide-react";
 import { processReturnReceipt } from "../actions";
+import { useRouter } from "next/navigation";
 
 export default function ReturnsClient({ customers, withCustomerCylinders = [], currentUser, vehicles = [], companyProfiles = [] }: any) {
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const [customerQuery, setCustomerQuery] = useState("");
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [selectedCompanyProfileId, setSelectedCompanyProfileId] = useState("");
@@ -96,6 +98,7 @@ export default function ReturnsClient({ customers, withCustomerCylinders = [], c
   };
 
   const handleSubmit = async () => {
+    if (isLoading) return; // Prevent double submit
     if (!selectedCustomerId) {
       setError("กรุณาเลือกลูกค้าที่รับถังคืน");
       return;
@@ -109,8 +112,17 @@ export default function ReturnsClient({ customers, withCustomerCylinders = [], c
     setError("");
 
     try {
-      await processReturnReceipt(selectedCustomerId, currentUser?.id || null, selectedVehicleId || null, scannedCylinders, selectedCompanyProfileId || null);
-      // It will redirect on success
+      const result = await processReturnReceipt(selectedCustomerId, currentUser?.id || null, selectedVehicleId || null, scannedCylinders, selectedCompanyProfileId || null) as any;
+      if (result.success) {
+        // Open print window
+        if (result.receiptId) {
+          window.open(`/print/returns/${result.receiptId}`, '_blank');
+        }
+        router.push(result.redirectTo);
+      } else {
+        setError(result.message || "เกิดข้อผิดพลาดในการบันทึก");
+        setIsLoading(false);
+      }
     } catch (err: any) {
       setError(err.message || "เกิดข้อผิดพลาดในการบันทึกรับถัง");
       setIsLoading(false);

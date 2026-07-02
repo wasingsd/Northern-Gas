@@ -55,6 +55,11 @@ model Cylinder {
   logs               CylinderLog[]
   returnReceiptItems ReturnReceiptItem[]
   deliveryReceiptItems DeliveryReceiptItem[]
+
+  @@index([status])
+  @@index([orderId])
+  @@index([currentCustomerId])
+  @@index([productId])
 }
 
 model RefillBatch {
@@ -75,6 +80,9 @@ model CylinderLog {
   notes      String?
   createdAt  DateTime @default(now())
   cylinder   Cylinder @relation(fields: [cylinderId], references: [id], onDelete: Cascade)
+
+  @@index([cylinderId])
+  @@index([createdAt])
 }
 
 model Order {
@@ -91,6 +99,10 @@ model Order {
   customer         Customer        @relation(fields: [customerId], references: [id])
   companyProfileId String?
   companyProfile   CompanyProfile? @relation(fields: [companyProfileId], references: [id])
+
+  @@index([customerId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model DeliveryJob {
@@ -110,6 +122,9 @@ model DeliveryJob {
   vehicle     Vehicle?  @relation(fields: [vehicleId], references: [id])
   order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   receipt     DeliveryReceipt?
+
+  @@index([status])
+  @@index([createdAt])
 }
 
 model GasProduct {

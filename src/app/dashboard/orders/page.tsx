@@ -14,6 +14,7 @@ export default async function OrdersPage() {
       deliveryJob: true,
     },
     orderBy: { createdAt: "desc" },
+    take: 50,
   });
 
   const StatusBadge = ({ status }: { status: string }) => {

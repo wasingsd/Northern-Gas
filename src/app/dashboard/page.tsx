@@ -17,29 +17,55 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
   const localStartDate = new Date(`${startParam}T00:00:00+07:00`);
   const localEndDate = new Date(`${endParam}T23:59:59+07:00`);
 
-  // 1. Order stats in period
-  const ordersInPeriod = await prisma.order.count({
-    where: { createdAt: { gte: localStartDate, lte: localEndDate } }
-  });
+  // Run all queries in parallel for better performance
+  const [
+    ordersInPeriod,
+    activeDispatches,
+    deliveredInPeriod,
+    cylinders,
+    cylindersSoldInPeriod,
+    logs
+  ] = await Promise.all([
+    // 1. Order stats in period
+    prisma.order.count({
+      where: { createdAt: { gte: localStartDate, lte: localEndDate } }
+    }),
+    // 2. Dispatch stats (Active)
+    prisma.deliveryJob.count({
+      where: { status: { in: ["WAITING", "OUT_FOR_DELIVERY"] } }
+    }),
+    // 3. Dispatch stats (Delivered)
+    prisma.deliveryJob.count({
+      where: { 
+        status: "DELIVERED",
+        updatedAt: { gte: localStartDate, lte: localEndDate }
+      }
+    }),
+    // 4. Cylinder Stats Grouped by Status
+    prisma.cylinder.groupBy({
+      by: ['status'],
+      _count: { id: true }
+    }),
+    // 5. Cylinders Sold in period (using aggregate instead of findMany + reduce)
+    prisma.cylinder.count({
+      where: {
+        order: {
+          createdAt: { gte: localStartDate, lte: localEndDate },
+          status: { not: "CANCELLED" }
+        }
+      }
+    }),
+    // 6. Timeline Logs
+    prisma.cylinderLog.findMany({
+      where: {
+        createdAt: { gte: localStartDate, lte: localEndDate }
+      },
+      include: { cylinder: true },
+      orderBy: { createdAt: "desc" },
+      take: 100, // Show max 100 to prevent performance issues
+    })
+  ]);
 
-  // 2. Dispatch stats
-  const activeDispatches = await prisma.deliveryJob.count({
-    where: { status: { in: ["WAITING", "OUT_FOR_DELIVERY"] } }
-  });
-  
-  const deliveredInPeriod = await prisma.deliveryJob.count({
-    where: { 
-      status: "DELIVERED",
-      updatedAt: { gte: localStartDate, lte: localEndDate }
-    }
-  });
-
-  // 3. Cylinder Stats
-  const cylinders = await prisma.cylinder.groupBy({
-    by: ['status'],
-    _count: { id: true }
-  });
-  
   const getCylCount = (status: string) => {
     return cylinders.find(c => c.status === status)?._count.id || 0;
   };
@@ -48,27 +74,6 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
   const emptyCount = getCylCount("RECEIVED_EMPTY");
   const inProcessCount = getCylCount("IN_PROCESS");
   const withCustomerCount = getCylCount("WITH_CUSTOMER");
-
-  // 4. Cylinders Sold in period
-  const periodOrders = await prisma.order.findMany({
-    where: {
-      createdAt: { gte: localStartDate, lte: localEndDate },
-      status: { not: "CANCELLED" }
-    },
-    include: { cylinders: true }
-  });
-  
-  const cylindersSoldInPeriod = periodOrders.reduce((sum, order) => sum + order.cylinders.length, 0);
-
-  // 5. Timeline Logs
-  const logs = await prisma.cylinderLog.findMany({
-    where: {
-      createdAt: { gte: localStartDate, lte: localEndDate }
-    },
-    include: { cylinder: true },
-    orderBy: { createdAt: "desc" },
-    take: 100, // Show max 100 to prevent performance issues
-  });
 
   // Plain objects for client component
   const plainLogs = JSON.parse(JSON.stringify(logs));

@@ -26,9 +26,12 @@ export default async function ReturnsPage() {
   // Fetch all cylinders currently with customers
   const withCustomerCylinders = await prisma.cylinder.findMany({
     where: { status: "WITH_CUSTOMER" },
-    include: { 
-      product: true,
-      order: { select: { companyProfileId: true } }
+    select: { 
+      id: true,
+      cylinderNo: true,
+      currentCustomerId: true,
+      product: { select: { name: true } },
+      order: { select: { companyProfileId: true } } 
     }
   });
 

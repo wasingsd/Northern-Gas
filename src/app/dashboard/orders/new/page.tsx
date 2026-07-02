@@ -16,6 +16,13 @@ export default async function NewOrderPage() {
       orderId: null,
       currentCustomerId: null,
       status: { not: "WITH_CUSTOMER" }
+    },
+    select: {
+      id: true,
+      cylinderNo: true,
+      qrCode: true,
+      productId: true,
+      status: true
     }
   });
   const companyProfiles = await prisma.companyProfile.findMany({ orderBy: { createdAt: "asc" } });

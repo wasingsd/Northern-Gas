@@ -87,60 +87,73 @@ export async function createOrderAction(formData: FormData) {
   const orderNo = `DSP-${datePrefix}${seqStr}`; 
   const jobNo = `JOB-${datePrefix}${seqStr}`;
 
-  // Group selected cylinders by productId to create OrderItems
-  const selectedCylinders = await prisma.cylinder.findMany({ where: { id: { in: cylinderIds } } });
-  const productCounts: Record<string, number> = {};
-  for (const c of selectedCylinders) {
-    if (c.productId) {
-      productCounts[c.productId] = (productCounts[c.productId] || 0) + 1;
-    }
-  }
-  const orderItemsData = Object.entries(productCounts).map(([productId, quantity]) => ({
-    productId,
-    quantity
-  }));
+  // Use transaction to prevent race conditions and double-submit
+  const order = await prisma.$transaction(async (tx) => {
+    // Validate cylinders are still available (not already assigned)
+    const selectedCylinders = await tx.cylinder.findMany({
+      where: { id: { in: cylinderIds } }
+    });
 
-  const order = await prisma.order.create({
-    data: {
-      orderNo,
-      customerId: customer.id,
-      companyProfileId: companyProfileId || null,
-      invoiceNo: invoiceNo || null,
-      status: "PENDING",
-      deliveryJob: {
-        create: {
-          jobNo,
-          status: "WAITING",
-          address: address || "รับที่ร้าน",
-          ...(vehicleId ? { vehicleId } : {}),
-          ...(driver1Id ? { driver1Id } : {}),
-          ...(driver2Id ? { driver2Id } : {})
-        }
-      },
-      items: {
-        create: orderItemsData
+    const alreadyAssigned = selectedCylinders.filter(c => c.orderId !== null);
+    if (alreadyAssigned.length > 0) {
+      throw new Error(`ถัง ${alreadyAssigned.map(c => c.cylinderNo).join(', ')} ถูกจองไปแล้ว กรุณารีเฟรชหน้าจอ`);
+    }
+
+    // Group selected cylinders by productId to create OrderItems
+    const productCounts: Record<string, number> = {};
+    for (const c of selectedCylinders) {
+      if (c.productId) {
+        productCounts[c.productId] = (productCounts[c.productId] || 0) + 1;
       }
     }
-  });
+    const orderItemsData = Object.entries(productCounts).map(([productId, quantity]) => ({
+      productId,
+      quantity
+    }));
 
-  // Update Cylinders with Order ID and change status
-  await prisma.cylinder.updateMany({
-    where: { id: { in: cylinderIds } },
-    data: {
-      orderId: order.id,
-      status: "READY_TO_DISPATCH"
-    }
-  });
+    // Create order + delivery job + items
+    const newOrder = await tx.order.create({
+      data: {
+        orderNo,
+        customerId: customer.id,
+        companyProfileId: companyProfileId || null,
+        invoiceNo: invoiceNo || null,
+        status: "PENDING",
+        deliveryJob: {
+          create: {
+            jobNo,
+            status: "WAITING",
+            address: address || "รับที่ร้าน",
+            ...(vehicleId ? { vehicleId } : {}),
+            ...(driver1Id ? { driver1Id } : {}),
+            ...(driver2Id ? { driver2Id } : {})
+          }
+        },
+        items: {
+          create: orderItemsData
+        }
+      }
+    });
 
-  // Log the cylinder movements
-  const logs = cylinderIds.map(cId => ({
-    cylinderId: cId,
-    status: "READY_TO_DISPATCH",
-    notes: `บันทึกรายการส่งถัง ${orderNo}`
-  }));
-  
-  await prisma.cylinderLog.createMany({
-    data: logs
+    // Update Cylinders with Order ID and change status
+    await tx.cylinder.updateMany({
+      where: { id: { in: cylinderIds } },
+      data: {
+        orderId: newOrder.id,
+        status: "READY_TO_DISPATCH"
+      }
+    });
+
+    // Log the cylinder movements
+    await tx.cylinderLog.createMany({
+      data: cylinderIds.map(cId => ({
+        cylinderId: cId,
+        status: "READY_TO_DISPATCH",
+        notes: `บันทึกรายการส่งถัง ${orderNo}`
+      }))
+    });
+
+    return newOrder;
   });
 
   revalidatePath("/dashboard/orders");
@@ -182,82 +195,82 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
     ...(customerCode ? { customerCode: customerCode } : {})
   };
 
-  await prisma.customer.update({
-    where: { id: order.customerId },
-    data: customerDataToUpdate
-  });
+  await prisma.$transaction(async (tx) => {
+    await tx.customer.update({
+      where: { id: order.customerId },
+      data: customerDataToUpdate
+    });
 
-  await prisma.order.update({
-    where: { id: order.id },
-    data: {
-      invoiceNo: invoiceNo || null,
-    }
-  });
-
-  const deliveryJob = await prisma.deliveryJob.findUnique({ where: { orderId: order.id } });
-  if (deliveryJob) {
-    await prisma.deliveryJob.update({
-      where: { id: deliveryJob.id },
-      data: { 
-        vehicleId: vehicleId || null,
-        driver1Id: driver1Id || null,
-        driver2Id: driver2Id || null,
-        address: address || "รับที่ร้าน"
+    await tx.order.update({
+      where: { id: order.id },
+      data: {
+        invoiceNo: invoiceNo || null,
       }
     });
-  }
 
-  // Reset old cylinders
-  if (order.cylinders && order.cylinders.length > 0) {
-    await prisma.cylinder.updateMany({
-      where: { orderId: order.id },
-      data: { orderId: null, status: "READY_TO_DISPATCH" }
-    });
-  }
-
-  // Delete old order items
-  await prisma.orderItem.deleteMany({
-    where: { orderId: order.id }
-  });
-
-  // Group new cylinders by productId to create new OrderItems
-  const selectedCylinders = await prisma.cylinder.findMany({ where: { id: { in: cylinderIds } } });
-  const productCounts: Record<string, number> = {};
-  for (const c of selectedCylinders) {
-    if (c.productId) {
-      productCounts[c.productId] = (productCounts[c.productId] || 0) + 1;
+    const deliveryJob = await tx.deliveryJob.findUnique({ where: { orderId: order.id } });
+    if (deliveryJob) {
+      await tx.deliveryJob.update({
+        where: { id: deliveryJob.id },
+        data: { 
+          vehicleId: vehicleId || null,
+          driver1Id: driver1Id || null,
+          driver2Id: driver2Id || null,
+          address: address || "รับที่ร้าน"
+        }
+      });
     }
-  }
-  const orderItemsData = Object.entries(productCounts).map(([productId, quantity]) => ({
-    orderId: order.id,
-    productId,
-    quantity
-  }));
-  
-  if (orderItemsData.length > 0) {
-    await prisma.orderItem.createMany({
-      data: orderItemsData
-    });
-  }
 
-  // Update Cylinders with Order ID and change status
-  await prisma.cylinder.updateMany({
-    where: { id: { in: cylinderIds } },
-    data: {
+    // Reset old cylinders
+    if (order.cylinders && order.cylinders.length > 0) {
+      await tx.cylinder.updateMany({
+        where: { orderId: order.id },
+        data: { orderId: null, status: "READY_TO_DISPATCH" }
+      });
+    }
+
+    // Delete old order items
+    await tx.orderItem.deleteMany({
+      where: { orderId: order.id }
+    });
+
+    // Group new cylinders by productId to create new OrderItems
+    const selectedCylinders = await tx.cylinder.findMany({ where: { id: { in: cylinderIds } } });
+    const productCounts: Record<string, number> = {};
+    for (const c of selectedCylinders) {
+      if (c.productId) {
+        productCounts[c.productId] = (productCounts[c.productId] || 0) + 1;
+      }
+    }
+    const orderItemsData = Object.entries(productCounts).map(([productId, quantity]) => ({
       orderId: order.id,
-      status: "READY_TO_DISPATCH"
+      productId,
+      quantity
+    }));
+    
+    if (orderItemsData.length > 0) {
+      await tx.orderItem.createMany({
+        data: orderItemsData
+      });
     }
-  });
 
-  // Log the cylinder movements
-  const logs = cylinderIds.map(cId => ({
-    cylinderId: cId,
-    status: "READY_TO_DISPATCH",
-    notes: `แก้ไขรายการส่งถัง (${order.orderNo})`
-  }));
-  
-  await prisma.cylinderLog.createMany({
-    data: logs
+    // Update Cylinders with Order ID and change status
+    await tx.cylinder.updateMany({
+      where: { id: { in: cylinderIds } },
+      data: {
+        orderId: order.id,
+        status: "READY_TO_DISPATCH"
+      }
+    });
+
+    // Log the cylinder movements
+    await tx.cylinderLog.createMany({
+      data: cylinderIds.map(cId => ({
+        cylinderId: cId,
+        status: "READY_TO_DISPATCH",
+        notes: `แก้ไขรายการส่งถัง (${order.orderNo})`
+      }))
+    });
   });
 
   revalidatePath("/dashboard/orders");

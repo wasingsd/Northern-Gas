@@ -43,29 +43,29 @@ export async function processReturnReceipt(customerId: string, driverId: string 
     });
 
     // 2. Update Cylinders
-    for (const c of cylinders) {
-      await tx.cylinder.update({
-        where: { id: c.id },
-        data: {
-          status: "RETURN_REQUESTED",
-        }
-      });
-      
-      await tx.cylinderLog.create({
-        data: {
-          cylinderId: c.id,
-          status: "RETURN_REQUESTED",
-          notes: `รอตรวจสอบรับคืน (ใบรับ: ${receiptNo})`
-        }
-      });
-    }
+    // 2. Update Cylinders in bulk
+    const cylinderIds = cylinders.map(c => c.id);
+    
+    await tx.cylinder.updateMany({
+      where: { id: { in: cylinderIds } },
+      data: {
+        status: "RETURN_REQUESTED",
+      }
+    });
+
+    await tx.cylinderLog.createMany({
+      data: cylinderIds.map(id => ({
+        cylinderId: id,
+        status: "RETURN_REQUESTED",
+        notes: `รอตรวจสอบรับคืน (ใบรับ: ${receiptNo})`
+      }))
+    });
 
     return newReceipt;
   });
 
   revalidatePath("/dashboard/returns");
-  revalidatePath("/dashboard/returns");
-  redirect("/dashboard/returns");
+  return { success: true, receiptId: newReceipt.id, redirectTo: "/dashboard/returns" };
 }
 
 export async function confirmReturnReceiptAction(receiptId: string, verifiedCylinderNos: string[] = [], adminId: string | null = null) {
@@ -116,19 +116,21 @@ export async function confirmReturnReceiptAction(receiptId: string, verifiedCyli
     const originalIds = receipt.items.map(i => i.cylinderId);
     const extraCylinders = verifiedCylinders.filter(c => !originalIds.includes(c.id));
     
-    for (const c of extraCylinders) {
-      await tx.returnReceiptItem.create({
-        data: {
+    if (extraCylinders.length > 0) {
+      await tx.returnReceiptItem.createMany({
+        data: extraCylinders.map(c => ({
           returnReceiptId: receipt.id,
           cylinderId: c.id
-        }
+        }))
       });
     }
 
     // 3. Update all verified cylinders to RECEIVED_EMPTY
-    for (const c of verifiedCylinders) {
-      await tx.cylinder.update({
-        where: { id: c.id },
+    if (verifiedCylinders.length > 0) {
+      const verifiedIds = verifiedCylinders.map(c => c.id);
+      
+      await tx.cylinder.updateMany({
+        where: { id: { in: verifiedIds } },
         data: {
           status: "RECEIVED_EMPTY",
           currentCustomerId: null,
@@ -136,12 +138,12 @@ export async function confirmReturnReceiptAction(receiptId: string, verifiedCyli
         }
       });
 
-      await tx.cylinderLog.create({
-        data: {
-          cylinderId: c.id,
+      await tx.cylinderLog.createMany({
+        data: verifiedIds.map(id => ({
+          cylinderId: id,
           status: "RECEIVED_EMPTY",
           notes: `อนุมัติรับคืนเข้าคลัง (ใบรับ: ${receipt.receiptNo})`
-        }
+        }))
       });
     }
 

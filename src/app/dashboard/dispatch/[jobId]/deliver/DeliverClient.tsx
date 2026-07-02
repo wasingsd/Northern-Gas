@@ -40,6 +40,7 @@ export default function DeliverClient({ jobId, expectedCylinders, customer }: an
   };
 
   const handleSubmit = async () => {
+    if (isLoading) return; // Prevent double submit
     if (scannedCylinders.length === 0) {
       setError("กรุณาสแกนถังอย่างน้อย 1 ใบ หรือกดยกเลิกการจัดส่งถ้าไม่มีถัง");
       return;
