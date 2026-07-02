@@ -4,6 +4,7 @@ import { updateOrderAction } from "../../actions";
 import OrderItemsForm from "../../new/OrderItemsForm";
 import CustomerSection from "../../new/CustomerSection";
 import OrderFormClient from "../../new/OrderFormClient";
+import VehicleSection from "../../new/VehicleSection";
 import { notFound } from "next/navigation";
 
 import prisma from "@/lib/prisma";
@@ -15,7 +16,8 @@ export default async function EditOrderPage({ params }: { params: Promise<{ orde
     where: { id: orderId },
     include: {
       customer: true,
-      cylinders: true
+      cylinders: true,
+      deliveryJob: true
     }
   });
 
@@ -45,6 +47,12 @@ export default async function EditOrderPage({ params }: { params: Promise<{ orde
       ]
     }
   });
+  
+  const vehicles = await prisma.vehicle.findMany({ orderBy: { registration: "asc" } });
+  const drivers = await prisma.user.findMany({ 
+    select: { id: true, name: true },
+    orderBy: { name: "asc" }
+  });
 
   // Get cylinders that are currently associated with this order
   const orderCylinders = await prisma.cylinder.findMany({
@@ -68,6 +76,14 @@ export default async function EditOrderPage({ params }: { params: Promise<{ orde
       <div className="rounded-xl border border-border bg-white shadow-sm overflow-hidden">
         <OrderFormClient action={updateActionWithId}>
           <CustomerSection customers={customers} initialData={order.customer} />
+          
+          <VehicleSection 
+            vehicles={vehicles} 
+            drivers={drivers}
+            defaultVehicleId={order.deliveryJob?.vehicleId || ""} 
+            defaultDriver1Id={order.deliveryJob?.driver1Id || ""}
+            defaultDriver2Id={order.deliveryJob?.driver2Id || ""}
+          />
           
           <OrderItemsForm cylinders={allCylinders} initialItems={orderCylinders} />
 

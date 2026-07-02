@@ -8,6 +8,9 @@ import { CreateOrderSchema } from "@/lib/validations";
 export async function createOrderAction(formData: FormData) {
   const customerName = formData.get("customerName") as string;
   const customerCode = formData.get("customerCode") as string;
+  const vehicleId = formData.get("vehicleId") as string;
+  const driver1Id = formData.get("driver1Id") as string;
+  const driver2Id = formData.get("driver2Id") as string;
   
   const cylinderIdsJson = formData.get("cylinderIds") as string;
   let cylinderIds: string[] = [];
@@ -103,7 +106,10 @@ export async function createOrderAction(formData: FormData) {
         create: {
           jobNo,
           status: "WAITING",
-          address: "รับที่ร้าน"
+          address: "รับที่ร้าน",
+          ...(vehicleId ? { vehicleId } : {}),
+          ...(driver1Id ? { driver1Id } : {}),
+          ...(driver2Id ? { driver2Id } : {})
         }
       },
       items: {
@@ -140,6 +146,9 @@ export async function createOrderAction(formData: FormData) {
 export async function updateOrderAction(orderId: string, formData: FormData) {
   const customerName = formData.get("customerName") as string;
   const customerCode = formData.get("customerCode") as string;
+  const vehicleId = formData.get("vehicleId") as string;
+  const driver1Id = formData.get("driver1Id") as string;
+  const driver2Id = formData.get("driver2Id") as string;
   
   const cylinderIdsJson = formData.get("cylinderIds") as string;
   let cylinderIds: string[] = [];
@@ -170,6 +179,18 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
     where: { id: order.customerId },
     data: customerDataToUpdate
   });
+
+  const deliveryJob = await prisma.deliveryJob.findUnique({ where: { orderId: order.id } });
+  if (deliveryJob) {
+    await prisma.deliveryJob.update({
+      where: { id: deliveryJob.id },
+      data: { 
+        vehicleId: vehicleId || null,
+        driver1Id: driver1Id || null,
+        driver2Id: driver2Id || null
+      }
+    });
+  }
 
   // Reset old cylinders
   if (order.cylinders && order.cylinders.length > 0) {

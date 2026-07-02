@@ -11,6 +11,7 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
     include: {
       customer: true,
       driver: true,
+      vehicle: true,
       items: {
         include: {
           cylinder: {
@@ -84,6 +85,7 @@ export default async function PrintReturnReceiptPage(props: { params: Promise<{ 
         <div style={{ marginBottom: "2px" }}>วันที่: {dateStr}</div>
         <div style={{ marginBottom: "2px" }}>อ้างอิง: {receipt.receiptNo}</div>
         <div style={{ marginBottom: "2px" }}>พนักงานรับ: {receipt.driver?.name || "ยังไม่ระบุ"}</div>
+        <div style={{ marginBottom: "2px" }}>ทะเบียนรถ: {receipt.vehicle?.registration || "-"}</div>
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         
         <div style={{ marginBottom: "2px", fontWeight: "bold" }}>ลูกค้า: {receipt.customer.name}</div>

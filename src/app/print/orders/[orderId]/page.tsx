@@ -14,7 +14,7 @@ export default async function PrintOrderPage(props: { params: Promise<{ orderId:
         include: { product: true }
       },
       deliveryJob: {
-        include: { driver: true }
+        include: { driver1: true, driver2: true, vehicle: true }
       }
     }
   });
@@ -83,7 +83,9 @@ export default async function PrintOrderPage(props: { params: Promise<{ orderId:
         <div style={{ marginBottom: "2px" }}>วันที่: {dateStr}</div>
         <div style={{ marginBottom: "2px" }}>เลขที่: {order.orderNo}</div>
         <div style={{ marginBottom: "2px" }}>DS: {order.deliveryJob?.jobNo || "-"}</div>
-        <div style={{ marginBottom: "2px" }}>พนักงานส่ง: {order.deliveryJob?.driver?.name || "ยังไม่ระบุ"}</div>
+        <div style={{ marginBottom: "2px" }}>พนักงานส่ง 1: {order.deliveryJob?.driver1?.name || "ยังไม่ระบุ"}</div>
+        <div style={{ marginBottom: "2px" }}>พนักงานส่ง 2: {order.deliveryJob?.driver2?.name || "ยังไม่ระบุ"}</div>
+        <div style={{ marginBottom: "2px" }}>ทะเบียนรถ: {order.deliveryJob?.vehicle?.registration || "-"}</div>
         <div style={{ borderTop: "1px dashed #000", margin: "6px 0" }}></div>
         
         <div style={{ marginBottom: "2px", fontWeight: "bold" }}>ผู้รับ: {order.customer.name}</div>

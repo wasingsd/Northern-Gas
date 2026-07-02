@@ -14,7 +14,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
       customer: true,
       cylinders: true,
       deliveryJob: {
-        include: { driver: true }
+        include: { driver1: true, driver2: true }
       }
     }
   });
@@ -106,9 +106,15 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
                 </span>
               </div>
               <div className="grid grid-cols-3 text-gray-500">
-                <span>พนักงานจัดส่ง</span>
+                <span>พนักงานจัดส่งคนที่ 1</span>
                 <span className="col-span-2 font-medium text-foreground">
-                  {order.deliveryJob.driver ? order.deliveryJob.driver.name : "ยังไม่ระบุ"}
+                  {order.deliveryJob.driver1 ? order.deliveryJob.driver1.name : "ยังไม่ระบุ"}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 text-gray-500">
+                <span>พนักงานจัดส่งคนที่ 2</span>
+                <span className="col-span-2 font-medium text-foreground">
+                  {order.deliveryJob.driver2 ? order.deliveryJob.driver2.name : "ยังไม่ระบุ"}
                 </span>
               </div>
               {order.deliveryJob.deliveredAt && (

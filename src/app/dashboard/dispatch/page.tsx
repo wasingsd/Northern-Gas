@@ -41,7 +41,8 @@ export default async function DispatchPage(props: { searchParams?: Promise<{ [ke
           items: { include: { product: true } }
         }
       },
-      driver: true,
+      driver1: true,
+      driver2: true,
     },
     orderBy: { createdAt: "asc" }
   });

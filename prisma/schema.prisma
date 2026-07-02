@@ -16,9 +16,10 @@ model User {
   password       String          @default("") // kept for migration safety; auth handled by Supabase
   role           String          @default("OWNER")
   createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  deliveryJobs   DeliveryJob[]
-  returnReceipts ReturnReceipt[]
+  updatedAt             DateTime        @updatedAt
+  deliveryJobsAsDriver1 DeliveryJob[]   @relation("Driver1")
+  deliveryJobsAsDriver2 DeliveryJob[]   @relation("Driver2")
+  returnReceipts        ReturnReceipt[]
 }
 
 model Customer {
@@ -90,13 +91,17 @@ model DeliveryJob {
   id          String    @id @default(cuid())
   jobNo       String    @unique
   orderId     String    @unique
-  driverId    String?
+  driver1Id   String?
+  driver1     User?     @relation("Driver1", fields: [driver1Id], references: [id])
+  driver2Id   String?
+  driver2     User?     @relation("Driver2", fields: [driver2Id], references: [id])
   status      String    @default("WAITING")
   address     String?
   deliveredAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  driver      User?     @relation(fields: [driverId], references: [id])
+  vehicleId   String?
+  vehicle     Vehicle?  @relation(fields: [vehicleId], references: [id])
   order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
@@ -139,6 +144,8 @@ model ReturnReceipt {
 
   customer Customer            @relation(fields: [customerId], references: [id])
   driver   User?               @relation(fields: [driverId], references: [id])
+  vehicleId String?
+  vehicle  Vehicle?            @relation(fields: [vehicleId], references: [id])
   items    ReturnReceiptItem[]
 }
 
@@ -163,4 +170,14 @@ model CompanyProfile {
   email     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Vehicle {
+  id             String          @id @default(cuid())
+  registration   String          @unique
+  description    String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deliveryJobs   DeliveryJob[]
+  returnReceipts ReturnReceipt[]
 }

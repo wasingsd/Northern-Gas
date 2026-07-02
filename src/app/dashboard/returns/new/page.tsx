@@ -29,6 +29,8 @@ export default async function ReturnsPage() {
     include: { product: true }
   });
 
+  const vehicles = await prisma.vehicle.findMany({ orderBy: { registration: "asc" } });
+
   // Convert to plain object safely
   const plainCustomers = JSON.parse(JSON.stringify(customers));
   const plainCylinders = JSON.parse(JSON.stringify(withCustomerCylinders));
@@ -43,7 +45,7 @@ export default async function ReturnsPage() {
         </div>
       </div>
       
-      <ReturnsClient customers={plainCustomers} withCustomerCylinders={plainCylinders} currentUser={plainUser} />
+      <ReturnsClient customers={plainCustomers} withCustomerCylinders={plainCylinders} currentUser={plainUser} vehicles={vehicles} />
     </div>
   );
 }

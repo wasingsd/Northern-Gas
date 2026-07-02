@@ -9,6 +9,7 @@ export default function SettingsNav() {
   const tabs = [
     { name: "ตั้งค่าบริษัท", href: "/dashboard/settings/company" },
     { name: "จัดการเจ้าของถัง", href: "/dashboard/settings/owners" },
+    { name: "ตั้งค่ารถ/ทะเบียนรถ", href: "/dashboard/settings/vehicles" },
   ];
 
   return (

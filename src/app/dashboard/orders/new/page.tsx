@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createOrderAction } from "../actions";
 import OrderItemsForm from "./OrderItemsForm";
 import CustomerSection from "./CustomerSection";
+import VehicleSection from "./VehicleSection";
 import OrderFormClient from "./OrderFormClient";
 
 import prisma from "@/lib/prisma";
@@ -16,6 +17,12 @@ export default async function NewOrderPage() {
       status: { not: "WITH_CUSTOMER" }
     }
   });
+  const vehicles = await prisma.vehicle.findMany({ orderBy: { registration: "asc" } });
+  const drivers = await prisma.user.findMany({ 
+    select: { id: true, name: true },
+    orderBy: { name: "asc" }
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -31,6 +38,8 @@ export default async function NewOrderPage() {
       <div className="rounded-xl border border-border bg-white shadow-sm overflow-hidden">
         <OrderFormClient action={createOrderAction}>
           <CustomerSection customers={customers} />
+          
+          <VehicleSection vehicles={vehicles} drivers={drivers} />
           
           <OrderItemsForm cylinders={cylinders} />
 

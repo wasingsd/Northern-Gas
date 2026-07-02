@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function processReturnReceipt(customerId: string, driverId: string | null, cylinderNos: string[]) {
+export async function processReturnReceipt(customerId: string, driverId: string | null, vehicleId: string | null, cylinderNos: string[]) {
   if (!customerId) throw new Error("กรุณาเลือกลูกค้า");
   if (cylinderNos.length === 0) throw new Error("กรุณาระบุถังที่รับคืนอย่างน้อย 1 ใบ");
 
@@ -32,6 +32,7 @@ export async function processReturnReceipt(customerId: string, driverId: string 
         receiptNo,
         customerId,
         driverId,
+        ...(vehicleId ? { vehicleId } : {}),
         items: {
           create: cylinders.map(c => ({
             cylinderId: c.id

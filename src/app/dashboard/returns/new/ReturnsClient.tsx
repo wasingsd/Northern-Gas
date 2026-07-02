@@ -4,12 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import { RotateCcw, Search, Trash2, Printer, Plus, CheckCircle2 } from "lucide-react";
 import { processReturnReceipt } from "../actions";
 
-export default function ReturnsClient({ customers, withCustomerCylinders = [], currentUser }: any) {
+export default function ReturnsClient({ customers, withCustomerCylinders = [], currentUser, vehicles = [] }: any) {
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const [customerQuery, setCustomerQuery] = useState("");
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
+  const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [cylinderInput, setCylinderInput] = useState("");
   const [scannedCylinders, setScannedCylinders] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -91,7 +92,7 @@ export default function ReturnsClient({ customers, withCustomerCylinders = [], c
     setError("");
 
     try {
-      await processReturnReceipt(selectedCustomerId, currentUser?.id || null, scannedCylinders);
+      await processReturnReceipt(selectedCustomerId, currentUser?.id || null, selectedVehicleId || null, scannedCylinders);
       // It will redirect on success
     } catch (err: any) {
       setError(err.message || "เกิดข้อผิดพลาดในการบันทึกรับถัง");
@@ -144,6 +145,24 @@ export default function ReturnsClient({ customers, withCustomerCylinders = [], c
                   ))}
                 </ul>
               )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                ทะเบียนรถที่รับคืน
+              </label>
+              <select 
+                value={selectedVehicleId}
+                onChange={(e) => setSelectedVehicleId(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:ring-primary focus:border-primary outline-none"
+              >
+                <option value="">-- ไม่ระบุ --</option>
+                {vehicles.map((v: any) => (
+                  <option key={v.id} value={v.id}>
+                    {v.registration} {v.description ? `(${v.description})` : ""}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
